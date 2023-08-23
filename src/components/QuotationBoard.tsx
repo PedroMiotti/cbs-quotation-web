@@ -48,11 +48,6 @@ interface QuotationLane {
 }
 
 const QuotationBoard = () => {
-  const [todoItems, setTodoItems] = useState<Array<Card>>([]);
-  const [doneItems, setDoneItems] = useState<Array<Card>>([]);
-  const [inProgressItems, setInProgressItems] = useState<Array<Card>>([]);
-  const [uItems, setuItems] = useState<Array<Card>>([]);
-
   const [quotations, setQuotations] = useState<Array<QuotationLane>>(lanes);
 
   return (
