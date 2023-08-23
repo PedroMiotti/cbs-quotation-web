@@ -10,7 +10,9 @@ import {
   Text,
   useDisclosure,
   Stack,
+  Icon,
 } from "@chakra-ui/react";
+import { AiOutlinePlusCircle } from "react-icons/ai";
 
 interface Products {
   id: number;
@@ -129,7 +131,7 @@ const Products = () => {
           color={"#FFFFFF"}
           _hover={{ bg: "#96c255" }}
         >
-          + Novo Produto
+          <Icon as={AiOutlinePlusCircle} mr={2} fontSize="20px" /> Novo Produto
         </Button>
       </Flex>
           <SearchTable
