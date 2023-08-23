@@ -1,5 +1,5 @@
 import { ComponentType } from "react";
-import Products from "../pages/Products";
+import Products from "./pages/Products";
 
 interface Route {
   name: string;

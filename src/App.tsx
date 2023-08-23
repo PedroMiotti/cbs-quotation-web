@@ -1,10 +1,8 @@
 import * as React from "react";
 import { Box, ChakraProvider } from "@chakra-ui/react";
-import QuotationBoard from "./components/QuotationBoard";
-import SidebarWithHeader from "./components/HeaderWithSidebar";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import PrivateRoute from "./components/PrivateRoute";
-import routes from "./navigation/routes";
+import routes from "./routes";
 
 function App() {
   return (

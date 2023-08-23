@@ -1,12 +1,12 @@
 import { Navigate, Outlet } from "react-router-dom";
-import SidebarWithHeader from "../HeaderWithSidebar";
+import SidebarWithHeader from "./HeaderWithSidebar";
 
 interface PrivateRouteProps {
   hasDefaultLayout: boolean;
 }
 
 function PrivateRoute({ hasDefaultLayout }: PrivateRouteProps) {
-  const isAuthenticated = true; // Todo adde real check for authenticated
+  const isAuthenticated = true; // Todo add real check for authenticated
   //localStorage.getItem('accessToken');
 
   if (!isAuthenticated) return <Navigate to="/login" replace />;

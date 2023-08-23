@@ -76,31 +76,31 @@ const Products = () => {
   const columns = useMemo(
     () => [
       columnHelper.accessor("id", {
-        cell: (info) => info.getValue(),
+        cell: (info: any) => info.getValue(),
         header: "ID",
       }),
       columnHelper.accessor("name", {
-        cell: (info) => info.getValue(),
+        cell: (info: any) => info.getValue(),
         header: "NOME",
       }),
       columnHelper.accessor("brand", {
-        cell: (info) => info.getValue(),
+        cell: (info: any) => info.getValue(),
         header: "MARCA",
       }),
       columnHelper.accessor("price", {
-        cell: (info) => info.getValue(),
+        cell: (info: any) => info.getValue(),
         header: "PREÇO",
       }),
       columnHelper.accessor("status", {
-        cell: (info) => info.getValue(),
+        cell: (info: any) => info.getValue(),
         header: "STATUS",
       }),
       columnHelper.accessor("createdAt", {
-        cell: (info) => info.getValue(),
+        cell: (info: any) => info.getValue(),
         header: "CRIADO EM",
       }),
       columnHelper.accessor("action", {
-        cell: (info) => {
+        cell: (info: any) => {
           const item = info.row.original;
           return <Actions item={item} />;
         },
@@ -132,8 +132,6 @@ const Products = () => {
           + Novo Produto
         </Button>
       </Flex>
-      <Card px="0px">
-        <CardBody>
           <SearchTable
             loading={isUsersRequestPending}
             columns={columns}
@@ -141,8 +139,6 @@ const Products = () => {
             totalCount={data.length}
             fetchPaginatedData={async () => console.log("teste")}
           />
-        </CardBody>
-      </Card>
     </Flex>
   );
 };
