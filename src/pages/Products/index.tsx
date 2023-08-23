@@ -120,6 +120,7 @@ const Products = () => {
         align="center"
         w="100%"
         mb="20px"
+        px={5}
       >
         <Text fontSize={"2xl"} fontWeight={"semibold"}>
           Produtos
