@@ -280,7 +280,7 @@ const SidebarContent = ({
                 .map((quotation) => (
                   <Link
                     key={quotation.id}
-                    href={`/quotations/${quotation.id}`}
+                    href={`/quotation/${quotation.id}`}
                     display="flex"
                     alignItems="center"
                     gap={2}
@@ -316,7 +316,7 @@ const SidebarContent = ({
                 .map((quotation) => (
                   <Link
                     key={quotation.id}
-                    href={`/quotations/${quotation.id}`}
+                    href={`/quotation/${quotation.id}`}
                     display="flex"
                     alignItems="center"
                     gap={2}
