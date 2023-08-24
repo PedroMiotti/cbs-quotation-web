@@ -140,6 +140,7 @@ export default function SearchTable<Data extends object>({
                         onClick={header.column.getToggleSortingHandler()}
                         isNumeric={meta?.isNumeric}
                         pe="0px"
+                        width={"80"}
                       >
                         <Flex
                           justify="space-between"

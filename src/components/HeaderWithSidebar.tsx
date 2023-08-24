@@ -52,7 +52,7 @@ const Tabs = [
   {
     name: "Marcas",
     icon: BsListUl,
-    route: "/",
+    route: "/marcas",
   },
 ];
 
@@ -177,8 +177,8 @@ export default function SidebarWithHeader({
             onClick={handleSidebarToggle}
           />
         </Box>
-        <Box ml={"2"} height='95vh'>
-          <Card height='100%' bg='white'  borderRadius='26px'>
+        <Box ml={"2"} height="95vh">
+          <Card height="100%" bg="white" borderRadius="26px">
             <CardBody p={7}>{children}</CardBody>
           </Card>
         </Box>
@@ -339,7 +339,7 @@ const SidebarContent = ({
       <Box
         display="flex"
         alignItems="center"
-        position={'fixed'}
+        position={"fixed"}
         bottom={8}
         left={6}
         _hover={{ bg: "gray.100", cursor: "pointer" }}
