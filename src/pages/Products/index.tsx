@@ -13,18 +13,9 @@ import {
   Icon,
 } from "@chakra-ui/react";
 import { AiOutlinePlusCircle } from "react-icons/ai";
+import { Product } from "../../types/Product";
 
-interface Products {
-  id: number;
-  name: string;
-  brand: string;
-  price: string;
-  status: string;
-  createdAt: string;
-  action?: React.ReactElement;
-}
-
-const Actions = ({ item }: { item: Products }) => {
+const Actions = ({ item }: { item: Product }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
     <>
@@ -40,34 +31,37 @@ const Actions = ({ item }: { item: Products }) => {
   );
 };
 
-const data: Products[] = [
+const data: Product[] = [
   {
     id: 1,
     name: "Arroz Branco",
-    brand: "Solito",
-    price: "R$10,20",
-    status: "Ativo",
-    createdAt: "10/08/2022",
+    brand_id: 1,
+    brand: { id: 1, name: "Solito" },
+    prices: [{ id: 1, price: 10.2, product_id: 1 }],
+    created_at: "10/08/2022",
+    weight: "500gr",
   },
   {
     id: 2,
     name: "Feijão Preto",
-    brand: "Solito",
-    price: "R$10,20",
-    status: "Ativo",
-    createdAt: "10/08/2022",
+    brand_id: 1,
+    brand: { id: 1, name: "Solito" },
+    prices: [{ id: 1, price: 10.2, product_id: 1 }],
+    created_at: "10/08/2022",
+    weight: "1kg",
   },
   {
     id: 3,
     name: "Lentilha",
-    brand: "Saint Paul",
-    price: "R$10,20",
-    status: "Ativo",
-    createdAt: "10/08/2022",
+    brand_id: 1,
+    brand: { id: 2, name: "Saint Paul" },
+    prices: [{ id: 1, price: 10.2, product_id: 1 }],
+    created_at: "10/08/2022",
+    weight: "100gr",
   },
 ];
 
-const columnHelper = createColumnHelper<Products>();
+const columnHelper = createColumnHelper<Product>();
 
 const Products = () => {
   const [pageCount, setPageCount] = useState(0);
@@ -86,27 +80,29 @@ const Products = () => {
         header: "NOME",
       }),
       columnHelper.accessor("brand", {
-        cell: (info: any) => info.getValue(),
+        cell: (info: any) => info.getValue().name,
         header: "MARCA",
       }),
-      columnHelper.accessor("price", {
-        cell: (info: any) => info.getValue(),
+      columnHelper.accessor("prices", {
+        // Todo: get current price and format
+        cell: (info: any) => info.getValue()[0].price,
         header: "PREÇO",
       }),
-      columnHelper.accessor("status", {
+      columnHelper.accessor("weight", {
         cell: (info: any) => info.getValue(),
-        header: "STATUS",
+        header: "PESO",
       }),
-      columnHelper.accessor("createdAt", {
+      columnHelper.accessor("created_at", {
         cell: (info: any) => info.getValue(),
         header: "CRIADO EM",
       }),
-      columnHelper.accessor("action", {
+      columnHelper.display({
+        id: "actions",
+        header: "AÇÃO",
         cell: (info: any) => {
           const item = info.row.original;
           return <Actions item={item} />;
         },
-        header: "AÇÃO",
       }),
     ],
     []
@@ -135,13 +131,13 @@ const Products = () => {
           <Icon as={AiOutlinePlusCircle} mr={2} fontSize="20px" /> Novo Produto
         </Button>
       </Flex>
-          <SearchTable
-            loading={isUsersRequestPending}
-            columns={columns}
-            data={data}
-            totalCount={data.length}
-            fetchPaginatedData={async () => console.log("teste")}
-          />
+      <SearchTable
+        loading={isUsersRequestPending}
+        columns={columns}
+        data={data}
+        totalCount={data.length}
+        fetchPaginatedData={async () => console.log("teste")}
+      />
     </Flex>
   );
 };

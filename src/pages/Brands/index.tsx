@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { createColumnHelper } from "@tanstack/react-table";
 import SearchTable from "../../components/SearchTable";
 import { Card, CardBody } from "@chakra-ui/card";
@@ -17,56 +17,42 @@ import {
 import { AiOutlinePlusCircle } from "react-icons/ai";
 import Modal from "../../components/Modal";
 import { useForm, SubmitHandler } from "react-hook-form";
+import { Brand } from "../../types/Brand";
+import { createBrand, fetchAllBrands, updateBrand } from "../../api/Brand";
 
 interface FormData {
   name: string;
 }
 
-interface Brands {
-  id: number;
-  name: string;
-  createdAt: string;
-  action?: React.ReactElement;
-}
-
-const Actions = ({ item }: { item: Brands }) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-
-  return (
-    <>
-      <Stack cursor={"pointer"} onClick={onOpen} direction={"row"}>
-        <Button bg={"#83B735"} color={"#FFFFFF"}>
-          Editar
-        </Button>
-      </Stack>
-    </>
-  );
-};
-
-const data: Brands[] = [
+const data: Brand[] = [
   {
     id: 1,
     name: "Solito",
-    createdAt: "10/08/2022",
+    created_at: "10/08/2022",
   },
   {
     id: 2,
     name: "Bauducco",
-    createdAt: "10/08/2022",
+    created_at: "10/08/2022",
   },
   {
     id: 3,
     name: "Milka",
-    createdAt: "10/08/2022",
+    created_at: "10/08/2022",
   },
 ];
 
-const columnHelper = createColumnHelper<Brands>();
+const columnHelper = createColumnHelper<Brand>();
 
 const Brands = () => {
   const [pageCount, setPageCount] = useState(0);
-  const [isUsersRequestPending, setIsUsersRequestPending] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [brands, setBrands] = useState<Brand[]>([]);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [actionType, setActionType] = useState<"create" | "edit">("create");
+  const [brandNameInputValue, setBrandNameInputValue] = useState<string>("");
+  const [selectedBrandId, setSelectedBrandId] = useState<number | null>(null);
+
   const {
     handleSubmit,
     register,
@@ -86,25 +72,110 @@ const Brands = () => {
         cell: (info: any) => info.getValue(),
         header: "NOME",
       }),
-      columnHelper.accessor("createdAt", {
-        cell: (info: any) => info.getValue(),
+      columnHelper.accessor("created_at", {
+        cell: (info: any) => (
+          <Text>{new Date(info.getValue()).toLocaleDateString("pt-br")}</Text>
+        ),
         header: "CRIADO EM",
       }),
-      columnHelper.accessor("action", {
+      columnHelper.display({
+        id: "action",
         cell: (info: any) => {
           const item = info.row.original;
-          return <Actions item={item} />;
+
+          return (
+            <Stack cursor={"pointer"} onClick={onOpen} direction={"row"}>
+              <Button
+                bg={"#83B735"}
+                color={"#FFFFFF"}
+                onClick={() => handleEditBrand(item.id)}
+              >
+                Editar
+              </Button>
+            </Stack>
+          );
         },
         header: "AÇÃO",
       }),
     ],
+    [brands]
+  );
+
+  const fetchBrands = useCallback(
+    async (pageIndex: number, pageSize: number) => {
+      setIsLoading(true);
+      fetchAllBrands()
+        .then((data) => {
+          setBrands(data);
+        })
+        .finally(() => setIsLoading(false));
+    },
     []
   );
 
-  const onSubmit: SubmitHandler<FormData> = (data) => {
-    console.log(data);
-    onClose();
-    reset();
+  const onSubmit: SubmitHandler<FormData> = async (data) => {
+    createBrand(data)
+      .then(async () => {
+        toast({
+          title: "Sucesso",
+          description: "Marca criada com sucesso!",
+          status: "success",
+          position: "top-right",
+        });
+
+        await fetchBrands(0, 0);
+
+        onClose();
+        reset();
+      })
+      .catch((e: any) => {
+        toast({
+          title: "Erro",
+          description: `Erro ao criar a marca, por favor contate o suporte. \n${e}`,
+          status: "error",
+          duration: 6000,
+          position: "top-right",
+          isClosable: true,
+        });
+      });
+  };
+
+  const handleEditBrand = (brandId: number) => {
+    const brand = brands.find((b) => b.id === brandId);
+    if (brand) {
+      setSelectedBrandId(brandId);
+      setBrandNameInputValue(brand.name);
+      setActionType("edit");
+      onOpen();
+    }
+  };
+
+  const handleModalSubmit = async () => {
+    if (actionType === "create") {
+      handleSubmit(onSubmit)();
+    } else if (selectedBrandId !== null) {
+      try {
+        await updateBrand(selectedBrandId, brandNameInputValue);
+        toast({
+          title: "Sucesso",
+          description: "Marca atualizada com sucesso!",
+          status: "success",
+          position: "top-right",
+        });
+        await fetchBrands(0, 0);
+        onClose();
+        reset();
+      } catch (error) {
+        toast({
+          title: "Erro",
+          description: `Erro ao atualizar a marca, por favor contate o suporte. \n${error}`,
+          status: "error",
+          duration: 6000,
+          position: "top-right",
+          isClosable: true,
+        });
+      }
+    }
   };
 
   return (
@@ -126,33 +197,45 @@ const Brands = () => {
           bg={"#83B735"}
           color={"#FFFFFF"}
           _hover={{ bg: "#96c255" }}
-          onClick={onOpen}
+          onClick={() => {
+            setActionType("create");
+            onOpen();
+          }}
         >
           <Icon as={AiOutlinePlusCircle} mr={2} fontSize="20px" /> Nova Marca
         </Button>
       </Flex>
       <SearchTable
-        loading={isUsersRequestPending}
+        loading={isLoading}
         columns={columns}
-        data={data}
-        totalCount={data.length}
-        fetchPaginatedData={async () => console.log("teste")}
+        data={brands}
+        totalCount={brands.length}
+        fetchPaginatedData={fetchBrands}
       />
       <Modal
         isOpen={isOpen}
         onClose={onClose}
-        title="Criar marca"
-        textButton="Criar"
-        onSubmit={handleSubmit(onSubmit)}
+        title={actionType === "create" ? "Criar marca" : "Editar marca"}
+        textButton={actionType === "create" ? "Criar" : "Editar "}
+        onSubmit={handleModalSubmit}
       >
         <form>
           <Box>
             <Text mb="8px">Nome</Text>
-            <Input
-              {...register("name", { required: true })}
-              placeholder="Ex: Solito"
-              focusBorderColor="#83B735"
-            />
+
+            {actionType === "create" ? (
+              <Input
+                {...register("name", { required: true })}
+                placeholder="Ex: Solito"
+                focusBorderColor="#83B735"
+              />
+            ) : (
+              <Input
+                value={brandNameInputValue}
+                onChange={(e) => setBrandNameInputValue(e.target.value)}
+              />
+            )}
+
             {errors.name && (
               <p style={{ color: "red", marginTop: "3px" }}>
                 Nome da marca é obrigatório
