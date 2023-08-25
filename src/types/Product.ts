@@ -5,14 +5,18 @@ export interface Product {
   name: string;
   weight: string;
   brand_id: number;
-  brand: Brand;
-  prices: ProductPrice[];
+  Brand: Brand;
+  ProductPrice: ProductPrice[];
   created_at: string;
   updated_at?: string;
 }
 
-export interface CreateProductRequest
-  extends Omit<Product, "id" | "created_at" | "updated_at"> {}
+export interface CreateProductRequest {
+  name: string;
+  weight: string;
+  brand_id: number;
+  price: { price: number; is_current: boolean };
+}
 
 export interface ProductPrice {
   id: number;
