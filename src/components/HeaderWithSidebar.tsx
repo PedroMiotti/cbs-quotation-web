@@ -61,31 +61,37 @@ const quotations: Quotation[] = [
     id: 1,
     name: "2022",
     type: "CHRISTMAS",
+    Composition: []
   },
   {
     id: 2,
     name: "2021",
     type: "CHRISTMAS",
+    Composition: []
   },
   {
     id: 3,
     name: "2023",
     type: "CHRISTMAS",
+    Composition: []
   },
   {
     id: 4,
     name: "Ambev",
     type: "CUSTOM",
+    Composition: []
   },
   {
     id: 5,
     name: "Vale",
     type: "CUSTOM",
+    Composition: []
   },
   {
     id: 6,
     name: "Brasuco",
     type: "CUSTOM",
+    Composition: []
   },
 ];
 

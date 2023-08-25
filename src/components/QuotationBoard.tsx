@@ -1,84 +1,80 @@
-import { DndContext, DragEndEvent, rectIntersection } from "@dnd-kit/core";
+import { Active, DndContext, DragEndEvent, KeyboardSensor, PointerSensor, rectIntersection, useSensor, useSensors } from "@dnd-kit/core";
 import { Flex } from "@chakra-ui/react";
-import { useState } from "react";
-import QuotationLane from "./QuotationLane";
-import AddCard from "./AddCard";
+import { useMemo, useState } from "react";
+import QuotationLaneComponent from "./QuotationLane";
+import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
+import { Composition, CompositionItem } from "../types/Composition";
 
-interface Card {
-  title: string;
+interface QuotationBoardProps {
+  data: Composition[];
+  setData: (data: any) => void;
+  handleDelete: (id: number) => void;
+  handleEdit: (id: number) => void;
+  handleAddItem: (id: number) => void;
 }
 
-const lanes: QuotationLane[] = [
-  {
-    id: 1,
-    name: "Diamante",
-    items: [
-      { id: 1, name: "Arroz solito" },
-      { id: 2, name: "Feijão" },
-    ],
-  },
-  {
-    id: 2,
-    name: "Ouro",
-    items: [
-      { id: 4, name: "Arroz solito" },
-      { id: 5, name: "Feijão" },
-    ],
-  },
-  {
-    id: 3,
-    name: "Rubi",
-    items: [
-      { id: 6, name: "Arroz solito" },
-      { id: 7, name: "Feijão" },
-    ],
-  },
-];
+const QuotationBoard = ({data, setData, handleDelete, handleEdit, handleAddItem}: QuotationBoardProps) => {
+  const [active, setActive] = useState<Active | null>(null);
+  const activeItem = useMemo(
+    () => {
+      const currentContainerId = active?.data.current?.parent;
 
-interface Product {
-  id: number;
-  name: string;
-  price?: number;
-}
+      const activeContainer = data.find((quotation) => quotation.id === +currentContainerId);
+      const activeCard: CompositionItem | undefined = activeContainer?.CompositionItems.find((item) => item.product_id === active?.id)
 
-interface QuotationLane {
-  id: number;
-  name: string;
-  items: Product[];
-}
+      return activeCard;
+    },
+    [active]
+  );
 
-const QuotationBoard = () => {
-  const [quotations, setQuotations] = useState<Array<QuotationLane>>(lanes);
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates
+    })
+  );
 
   return (
     <DndContext
+      sensors={sensors}
+      onDragStart={({ active }) => {
+        setActive(active);
+      }}
       collisionDetection={rectIntersection}
       onDragEnd={(e: DragEndEvent) => {
         const nextLane = e.over?.id;
         const currentLane = e.active.data.current?.parent;
         const currentItemId = e.active.id;
 
-        const currentQuotationLane = quotations.find(
-          (quotation) => quotation.name === currentLane
+        const currentQuotationLane = data.find(
+          (quotation) => quotation.id === +currentLane
         );
 
-        const currentQuotationItem = currentQuotationLane?.items.find(
-          (item) => item.id === currentItemId
+        const nextQuotationLane = data.find(
+          (quotation) => quotation.id === nextLane
         );
 
-        if(!currentQuotationItem) return
+        const currentQuotationItem = currentQuotationLane?.CompositionItems.find(
+          (item) => item.product_id === currentItemId
+        );
 
-        const updatedQuotations = quotations.map((quotation) => {
+        const isAlreadyInLane = nextQuotationLane?.CompositionItems.find(
+          (item) => item.product_id === currentQuotationItem?.product_id
+        );
+
+        if(!currentQuotationItem || isAlreadyInLane) return
+
+        const updatedQuotations = data.map((quotation) => {
           if (quotation.id === nextLane) {
             return {
               ...quotation,
-              items: [...quotation.items, currentQuotationItem],
+              items: [...quotation.CompositionItems, currentQuotationItem],
             };
-          } else if (quotation.name === currentLane) {
+          } else if (quotation.id === +currentLane) {
             return {
               ...quotation,
-              items: quotation.items.filter(
-                (item) => item.id !== currentItemId
+              items: quotation.CompositionItems.filter(
+                (item) => item.product_id !== currentItemId
               ),
             };
           } else {
@@ -86,16 +82,17 @@ const QuotationBoard = () => {
           }
         });
 
-        setQuotations(updatedQuotations);
+        setActive(null);
+        setData(updatedQuotations);
+      }}
+      onDragCancel={() => {
+        setActive(null);
       }}
     >
-      <Flex flexDirection="column">
-        {/* <AddCard addCard={addNewCard} /> */}
-        <Flex flex="3">
-          {quotations.map((lane: any) => (
-            <QuotationLane id={lane.id} title={lane.name} items={lane.items} />
-          ))}
-        </Flex>
+      <Flex overflowX='scroll' height="100%">
+        {data.map((lane: Composition) => (
+          <QuotationLaneComponent handleAddItem={handleAddItem} handleDelete={handleDelete} handleEdit={handleEdit} key={lane.id} activeItem={activeItem} id={lane.id} title={lane.name} items={lane.CompositionItems} />
+        ))}
       </Flex>
     </DndContext>
   );

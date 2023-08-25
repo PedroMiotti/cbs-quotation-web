@@ -6,7 +6,9 @@ export interface Product {
   weight: string;
   brand_id: number;
   brand: Brand;
+  Brand?: Brand;
   prices: ProductPrice[];
+  ProductPrice?: ProductPrice[];
   created_at: string;
   updated_at?: string;
 }
