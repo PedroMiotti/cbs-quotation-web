@@ -76,7 +76,7 @@ const ProductCard = ({
     >
       <Flex align="center" justifyContent="space-between">
         <Text fontSize="lg" fontWeight="600">
-          {product.name}
+          {product.name} {product?.Brand?.name} {product.weight}
         </Text>
 
         <Popover
@@ -99,11 +99,6 @@ const ProductCard = ({
               <EditProductPopover props={{ value: name, onChange: (e) => setName(e.target.value) }}/>
           </PopoverContent>
         </Popover>
-      </Flex>
-
-      <Flex gap={2}>
-        <Tag>{product?.Brand?.name}</Tag>
-        <Tag>{product.weight}</Tag>
       </Flex>
 
       <Flex justify="space-between" align="center" px={1}>

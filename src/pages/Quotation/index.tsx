@@ -229,6 +229,7 @@ const Quotation = () => {
   }
 
   const handleMoveItem = async (itemId: number, compositionId: number, newCompositionId: number) => {
+    if(compositionId === newCompositionId) return;
     await moveItem(itemId, compositionId, newCompositionId);
   }
 
