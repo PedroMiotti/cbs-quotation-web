@@ -17,8 +17,6 @@ export interface CompositionItem {
     composition_id: number;
     quantity: number;
     Product: Product;
-    created_at: string;
-    updated_at: string;
 }
 
 export interface CreateCompositionItemRequest extends Omit<CompositionItem, 'id' | 'created_at' | 'updated_at'> {}

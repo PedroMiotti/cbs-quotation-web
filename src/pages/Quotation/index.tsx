@@ -27,10 +27,12 @@ import { Product } from "../../types/Product";
 import { useParams } from "react-router-dom";
 import { Quotation as QuotationType } from "../../types/Quotation";
 import { fetchQuotation } from "../../api/Quotation";
-import { Composition } from "../../types/Composition";
+import { Composition, CompositionItem } from "../../types/Composition";
 import {
+  addItemToComposition,
   createComposition,
   deleteComposition,
+  moveItem,
   updateComposition,
 } from "../../api/Composition";
 import Modal from "../../components/Modal";
@@ -38,14 +40,13 @@ import { useDebounce } from "../../hooks/useDebounce";
 import { fetchAllProducts } from "../../api/Product";
 import { ReactSearchAutocomplete } from "react-search-autocomplete";
 import "../../styles/global.css";
+import { formatToBrlCurrency } from "../../utils/formatCurrency";
 
 export interface QuotationLane {
   id: number;
   name: string;
   items: Product[];
 }
-
-// Todo - Add scroll to the end of board when composition are created
 
 const Quotation = () => {
   let { id } = useParams();
@@ -61,6 +62,7 @@ const Quotation = () => {
   }>({ name: "", margin: 0 });
   const [actionType, setActionType] = useState<"create" | "edit">("create");
   const [products, setProducts] = useState<Product[]>([]);
+  const [compositionId, setCompositionId] = useState<number | undefined>();
 
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -95,7 +97,19 @@ const Quotation = () => {
   }, []);
 
   const handleCreateComposition = () => {
-    if (!quotation || !compositionForm.name || !compositionForm.margin) return;
+    if(!compositionForm.name || !compositionForm.margin) {
+      toast({
+        title: "Erro",
+        description: `Por favor preencha todos os campos.`,
+        status: "error",
+        duration: 6000,
+        position: "top-right",
+        isClosable: true,
+      });
+      return 
+    }
+
+    if (!quotation) return;
 
     setIsLoadingActionOnComposition(true);
     createComposition({
@@ -177,7 +191,46 @@ const Quotation = () => {
 
   const handleAddItem = (id: number) => {
     onOpenAddItemModal();
+    setCompositionId(id)
   };
+
+  const handleSaveItem = (item: Product, quantity: number) => {
+    if (!compositionId) return;
+    
+    const composition = compositions.find(
+      (composition) => composition.id === compositionId
+    );
+
+    if (!composition) return;
+
+    addItemToComposition(compositionId, item.id, quantity).then(() => {
+      const updatedCompositions = compositions.map((composition) => {
+        if (composition.id === compositionId) {
+          const compositionItem = {
+            product_id: item.id,
+            composition_id: compositionId,
+            quantity: quantity,
+            Product: item,  
+          }
+  
+          return {
+            ...composition,
+            CompositionItems: [...composition.CompositionItems, compositionItem],
+          };
+        }
+  
+        return composition;
+      }
+      );
+
+      setCompositions(updatedCompositions);
+    })
+    
+  }
+
+  const handleMoveItem = async (itemId: number, compositionId: number, newCompositionId: number) => {
+    await moveItem(itemId, compositionId, newCompositionId);
+  }
 
   const closeModal = () => {
     setCompositionForm({ id: undefined, name: "", margin: 0 });
@@ -261,6 +314,7 @@ const Quotation = () => {
             setData={setCompositions}
             handleDelete={handleDeleteComposition}
             handleEdit={handleEditComposition}
+            handleMoveItem={handleMoveItem}
           />
         )}
       </Box>
@@ -269,6 +323,7 @@ const Quotation = () => {
         products={products}
         isOpen={isAddItemModalOpen}
         onClose={onCloseAddItemModal}
+        submit={handleSaveItem}
       />
     </Flex>
   );
@@ -278,18 +333,19 @@ interface AddItemModalProps {
   products: Product[];
   isOpen: boolean;
   onClose: () => void;
+  submit: (item: Product, quantity: number) => void;
 }
 
 type ProductWithCurrentPrice = Product & { currentPrice: number };
 
-const AddItemModal = ({ products, isOpen, onClose }: AddItemModalProps) => {
+const AddItemModal = ({ products, isOpen, onClose, submit }: AddItemModalProps) => {
   const [itemFormModal, setItemFormModal] = useState<{
     id?: number;
     quantity: number;
   } | null>({ quantity: 1 });
   const [selectedProduct, setSelectedProduct] =
     useState<ProductWithCurrentPrice | null>(null);
-  const [totalValue, setTotalValue] = useState<string>("R$0");
+  const [totalValue, setTotalValue] = useState<number>(0);
 
   const handleOnSelect = (item: Product) => {
     const currentPrice =
@@ -301,20 +357,27 @@ const AddItemModal = ({ products, isOpen, onClose }: AddItemModalProps) => {
     });
 
     const total = currentPrice * (itemFormModal?.quantity ?? 0);
-    setTotalValue(`R$${total}`);
+    setTotalValue(total);
   };
 
   const closeModal = () => {
     setItemFormModal({ quantity: 1 });
     setSelectedProduct(null);
-    setTotalValue("R$0");
+    setTotalValue(0);
     onClose();
   };
+
+  const handleAdd = () => {
+    if (!selectedProduct || !itemFormModal?.quantity) return;
+
+    submit(selectedProduct, itemFormModal?.quantity);
+    closeModal();
+  }
 
   useEffect(() => {
     const total =
       (selectedProduct?.currentPrice ?? 0) * (itemFormModal?.quantity ?? 0);
-    setTotalValue(`R$${total}`);
+    setTotalValue(total);
   }, [itemFormModal?.quantity]);
 
   return (
@@ -324,8 +387,8 @@ const AddItemModal = ({ products, isOpen, onClose }: AddItemModalProps) => {
       onClose={closeModal}
       title="Adicionar Produto"
       textButton={"Adicionar"}
-      onSubmit={() => {}}
-      footerText={totalValue}
+      onSubmit={handleAdd}
+      footerText={formatToBrlCurrency(totalValue)}
       // isLoading={}
     >
       <Flex direction="column" gap={4}>
@@ -348,7 +411,7 @@ const AddItemModal = ({ products, isOpen, onClose }: AddItemModalProps) => {
           </FormControl>
           <FormControl>
             <FormLabel>Preço</FormLabel>
-            <Input value={selectedProduct?.currentPrice} disabled={true} />
+            <Input value={formatToBrlCurrency(selectedProduct?.currentPrice)} disabled={true} />
           </FormControl>
         </Stack>
 

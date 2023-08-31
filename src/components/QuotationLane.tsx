@@ -1,4 +1,5 @@
 import {
+  Divider,
   Flex,
   Icon,
   IconButton,
@@ -10,15 +11,16 @@ import {
 } from "@chakra-ui/react";
 import { DragOverlay, useDroppable } from "@dnd-kit/core";
 import ProductCard from "./ProductCard";
-import { Product } from "../types/Product";
 import { EditIcon } from "@chakra-ui/icons";
 import { BsThreeDots } from "react-icons/bs";
 import { AiOutlineDelete, AiOutlinePlusCircle } from "react-icons/ai";
-import { CompositionItem } from "../types/Composition";
+import { Composition, CompositionItem } from "../types/Composition";
+import { formatToBrlCurrency } from "../utils/formatCurrency";
 
 interface QuotationLaneProps {
   id: number;
   title: string;
+  composition: Composition;
   items: CompositionItem[];
   activeItem?: CompositionItem;
   handleDelete: (id: number) => void;
@@ -30,16 +32,25 @@ const QuotationLane = ({
   id,
   title,
   items,
+  composition,
   activeItem,
   handleDelete,
   handleEdit,
-  handleAddItem
+  handleAddItem,
 }: QuotationLaneProps) => {
   const { setNodeRef } = useDroppable({
     id,
   });
 
-  // Todo - fix overflow on lane 
+  // Todo - fix overflow on lane
+
+  const subtotal = items.reduce((acc, item) => {
+    const currentPrice =
+      item?.Product?.ProductPrice?.find((price) => price.is_current)?.price ?? 0;
+
+    return acc + currentPrice * item.quantity;
+  }
+  , 0);
 
   return (
     <Flex
@@ -94,8 +105,13 @@ const QuotationLane = ({
                 bg="transparent"
               />
               <MenuList>
-                <MenuItem onClick={() => handleEdit(id)} icon={<EditIcon />}>Editar</MenuItem>
-                <MenuItem onClick={() => handleDelete(id)} icon={<AiOutlineDelete fontSize="15px" />}>
+                <MenuItem onClick={() => handleEdit(id)} icon={<EditIcon />}>
+                  Editar
+                </MenuItem>
+                <MenuItem
+                  onClick={() => handleDelete(id)}
+                  icon={<AiOutlineDelete fontSize="15px" />}
+                >
                   Excluir
                 </MenuItem>
               </MenuList>
@@ -104,10 +120,11 @@ const QuotationLane = ({
         </Flex>
 
         <ul role="application">
-          {items.map(({ Product, product_id: itemId }, key) => (
+          {items.map(({ Product, product_id: itemId, quantity }, key) => (
             <ProductCard
               id={itemId}
-              title={Product.name}
+              product={Product}
+              quantity={quantity}
               key={key}
               index={key}
               parent={id}
@@ -140,6 +157,16 @@ const QuotationLane = ({
             />
           ) : null}
         </DragOverlay> */}
+      </Flex>
+      <Divider />
+      <Flex backgroundColor="#f8f8f8" borderRadius="8" px={6} py={3}>
+        <Text fontSize="lg" fontWeight="600" mt={4}>
+          Total
+        </Text>
+
+        <Text fontSize="lg" fontWeight="600" mt={4} ml="auto">
+          {formatToBrlCurrency((subtotal * (composition.margin / 100)) + subtotal )}
+        </Text>
       </Flex>
     </Flex>
   );

@@ -11,9 +11,10 @@ interface QuotationBoardProps {
   handleDelete: (id: number) => void;
   handleEdit: (id: number) => void;
   handleAddItem: (id: number) => void;
+  handleMoveItem: (itemId: number, compositionId: number, newCompositionId: number) => void;
 }
 
-const QuotationBoard = ({data, setData, handleDelete, handleEdit, handleAddItem}: QuotationBoardProps) => {
+const QuotationBoard = ({data, setData, handleDelete, handleEdit, handleAddItem, handleMoveItem}: QuotationBoardProps) => {
   const [active, setActive] = useState<Active | null>(null);
   const activeItem = useMemo(
     () => {
@@ -68,12 +69,12 @@ const QuotationBoard = ({data, setData, handleDelete, handleEdit, handleAddItem}
           if (quotation.id === nextLane) {
             return {
               ...quotation,
-              items: [...quotation.CompositionItems, currentQuotationItem],
+              CompositionItems: [...quotation.CompositionItems, currentQuotationItem],
             };
           } else if (quotation.id === +currentLane) {
             return {
               ...quotation,
-              items: quotation.CompositionItems.filter(
+              CompositionItems: quotation.CompositionItems.filter(
                 (item) => item.product_id !== currentItemId
               ),
             };
@@ -84,6 +85,7 @@ const QuotationBoard = ({data, setData, handleDelete, handleEdit, handleAddItem}
 
         setActive(null);
         setData(updatedQuotations);
+        handleMoveItem(+currentLane, +currentItemId, +nextLane!);
       }}
       onDragCancel={() => {
         setActive(null);
@@ -91,7 +93,7 @@ const QuotationBoard = ({data, setData, handleDelete, handleEdit, handleAddItem}
     >
       <Flex overflowX='scroll' height="100%">
         {data.map((lane: Composition) => (
-          <QuotationLaneComponent handleAddItem={handleAddItem} handleDelete={handleDelete} handleEdit={handleEdit} key={lane.id} activeItem={activeItem} id={lane.id} title={lane.name} items={lane.CompositionItems} />
+          <QuotationLaneComponent composition={lane} handleAddItem={handleAddItem} handleDelete={handleDelete} handleEdit={handleEdit} key={lane.id} activeItem={activeItem} id={lane.id} title={lane.name} items={lane.CompositionItems} />
         ))}
       </Flex>
     </DndContext>
