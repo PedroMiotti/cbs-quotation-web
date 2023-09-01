@@ -28,7 +28,7 @@ import {
 } from "@chakra-ui/react";
 import { ReactText } from "react";
 import { IconType } from "react-icons";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.svg";
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import { Quotation } from "../types/Quotation";
@@ -205,6 +205,13 @@ const SidebarContent = ({
   onItemClick,
   ...rest
 }: SidebarProps) => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/auth");
+  }
+  
   return (
     <Box
       bg={useColorModeValue("#F7F7F7", "gray.900")}
@@ -349,6 +356,7 @@ const SidebarContent = ({
         bottom={8}
         left={6}
         _hover={{ bg: "gray.100", cursor: "pointer" }}
+        onClick={handleLogout}
       >
         <Icon as={FiLogOut} color="gray.500" mr={2} />
         <Text color="gray.500" fontWeight="semibold" fontSize="md">

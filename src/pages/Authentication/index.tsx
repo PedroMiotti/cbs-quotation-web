@@ -10,9 +10,12 @@ import {
   Text,
   useColorModeValue,
   useToast,
+  Image,
+  FormLabel
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import logo from "../../assets/logo.svg";
 
 const Authentication = () => {
   const [password, setPassword] = useState("");
@@ -56,16 +59,11 @@ const Authentication = () => {
         p={6}
         my={12}
       >
-        <Heading lineHeight={1.1} fontSize={{ base: "2xl", md: "3xl" }}>
-          Bem-vindo ao Cbs Cotação
-        </Heading>
-        <Text
-          fontSize={{ base: "sm", sm: "md" }}
-          color={useColorModeValue("gray.800", "gray.400")}
-        >
-          Se autentique para continuar
-        </Text>
+        <Flex w="full" align="center" justify="center">
+          <Image src={logo} width={200} height={130} alt="Cbs logo" />
+        </Flex>
         <FormControl id="password">
+        {/* <FormLabel>Senha</FormLabel> */}
           <Input
             value={password}
             onChange={(e) => setPassword(e.target.value)}
