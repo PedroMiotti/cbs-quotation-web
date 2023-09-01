@@ -22,14 +22,14 @@ const routes: Route[] = [
     component: Brands,
   },
   {
-    name: "Cotações",
+    name: "Editar Cotações",
     path: "/quotation/edit/:id",
     component: EditQuotation,
   },
   {
     name: "Cotações",
-    path: "/quotation/:id",
-    component: Quotation,
+    path: "/quotation",
+    component: Quotations,
   },
 ];
 
