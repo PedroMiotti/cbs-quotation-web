@@ -183,7 +183,7 @@ export default function SidebarWithHeader({
             onClick={handleSidebarToggle}
           />
         </Box>
-        <Box ml={"2"} height="95vh">
+        <Box ml={"2"}>
           <Card height="100%" bg="white" borderRadius="26px">
             <CardBody p={7}>{children}</CardBody>
           </Card>

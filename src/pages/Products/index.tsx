@@ -187,7 +187,7 @@ const Products = () => {
   };
 
   return (
-    <Flex direction="column">
+    <Flex direction="column" >
       <Flex
         direction={{ sm: "column", md: "row" }}
         justify="space-between"
@@ -219,6 +219,7 @@ const Products = () => {
         totalCount={products.length}
         fetchPaginatedData={fetchProducts}
       />
+
       <Modal
         isOpen={isOpen}
         onClose={onClose}

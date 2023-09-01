@@ -3,6 +3,7 @@ import { Box, ChakraProvider } from "@chakra-ui/react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import PrivateRoute from "./components/PrivateRoute";
 import routes from "./routes";
+import Authentication from "./pages/Authentication";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
       <ChakraProvider>
         <BrowserRouter>
           <Routes>
+            <Route path="/auth" element={<Authentication />} />
             <Route element={<PrivateRoute hasDefaultLayout />}>
               {routes.map((route, index) => (
                 <Route

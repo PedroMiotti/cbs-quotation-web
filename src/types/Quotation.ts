@@ -17,4 +17,4 @@ export interface QuotationTable {
   tag?: string;
 }
 
-export interface CreateQuotationRequest extends Omit<Quotation, "id"> {}
+export interface CreateQuotationRequest extends Omit<Quotation, "id" | 'Composition'> {}

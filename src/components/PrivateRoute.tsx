@@ -6,10 +6,9 @@ interface PrivateRouteProps {
 }
 
 function PrivateRoute({ hasDefaultLayout }: PrivateRouteProps) {
-  const isAuthenticated = true; // Todo add real check for authenticated
-  //localStorage.getItem('accessToken');
+  const isAuthenticated = localStorage.getItem('token');
 
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (!isAuthenticated) return <Navigate to="/auth" replace />;
 
   if (hasDefaultLayout)
     return (
