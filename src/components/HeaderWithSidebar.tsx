@@ -61,31 +61,37 @@ const quotations: Quotation[] = [
     id: 1,
     name: "2022",
     type: "CHRISTMAS",
+    Composition: []
   },
   {
     id: 2,
     name: "2021",
     type: "CHRISTMAS",
+    Composition: []
   },
   {
     id: 3,
     name: "2023",
     type: "CHRISTMAS",
+    Composition: []
   },
   {
     id: 4,
     name: "Ambev",
     type: "CUSTOM",
+    Composition: []
   },
   {
     id: 5,
     name: "Vale",
     type: "CUSTOM",
+    Composition: []
   },
   {
     id: 6,
     name: "Brasuco",
     type: "CUSTOM",
+    Composition: []
   },
 ];
 
@@ -177,7 +183,7 @@ export default function SidebarWithHeader({
             onClick={handleSidebarToggle}
           />
         </Box>
-        <Box ml={"2"} height="95vh">
+        <Box ml={"2"}>
           <Card height="100%" bg="white" borderRadius="26px">
             <CardBody p={7}>{children}</CardBody>
           </Card>
@@ -280,7 +286,7 @@ const SidebarContent = ({
                 .map((quotation) => (
                   <Link
                     key={quotation.id}
-                    href={`/quotation/${quotation.id}`}
+                    href={`/quotation/edit/${quotation.id}`}
                     display="flex"
                     alignItems="center"
                     gap={2}
@@ -316,7 +322,7 @@ const SidebarContent = ({
                 .map((quotation) => (
                   <Link
                     key={quotation.id}
-                    href={`/quotation/${quotation.id}`}
+                    href={`/quotation/edit/${quotation.id}`}
                     display="flex"
                     alignItems="center"
                     gap={2}

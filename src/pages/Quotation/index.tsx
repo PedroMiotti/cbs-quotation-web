@@ -273,6 +273,7 @@ const Quotation = () => {
         title={"Criar Cotação"}
         textButton={"Criar"}
         onSubmit={handleSubmit(onSubmit)}
+        size="lg"
       >
         <form>
           <Box>
@@ -289,10 +290,14 @@ const Quotation = () => {
             )}
           </Box>
           <Stack mt={4} direction={"row"}>
-            <Box>
+            <Box w="full">
               <Text mb="8px">Tipo</Text>
               <Stack direction={"row"} justify={"center"} align={"center"}>
                 <Tag
+                  display="flex"
+                  justifyContent="center"
+                  w="full"
+                  h="40px"
                   onClick={() => handleTagClick(QuotationType.CHRISTMAS)}
                   variant="subtle"
                   colorScheme={
@@ -304,6 +309,10 @@ const Quotation = () => {
                   Natal
                 </Tag>
                 <Tag
+                  display="flex"
+                  justifyContent="center"
+                  w="full"
+                  h="40px"
                   onClick={() => handleTagClick(QuotationType.CUSTOM)}
                   variant="subtle"
                   colorScheme={
@@ -315,11 +324,11 @@ const Quotation = () => {
                 </Tag>
               </Stack>
             </Box>
-            <Box>
+            <Box w="full">
               <Stack spacing={"2"} direction={"row"}>
                 <Text mb="8px">Tag</Text>
                 <Tooltip
-                  label="Caso já tenha uma composição com esse nome, pode adicionar uma tag, Ex: Ambev V2(versão 2)"
+                  label="Se há uma composição com esse nome, adicione uma tag"
                   hasArrow
                   placement="top"
                 >

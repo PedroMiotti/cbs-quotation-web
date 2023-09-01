@@ -15,6 +15,11 @@ export const fetchAllQuotations = async () => {
   return response.data;
 };
 
+export const fetchQuotation = async (id: number) => {
+  const response = await Api.get<Quotation>(`/quotation/${id}`);
+  return response.data;
+};
+
 export const deleteQuotation = async (quotationId: number) => {
   const response = await Api.delete(`/quotation/${quotationId}`);
   return response.data;

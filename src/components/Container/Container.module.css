@@ -1,0 +1,111 @@
+.Container {
+  display: 'flex';
+  flex-direction: 'column';
+  grid-auto-rows: 'max-content';
+  overflow: 'hidden';
+  box-sizing: 'border-box';
+  appearance: 'none';
+  outline: 'none';
+  min-width: 350px;
+  margin: 10px;
+  border-radius: 5px;
+  min-height: 200px;
+  transition: background-color 350ms ease;
+  background-color: #f8f8f8;
+  /* border: 1px solid rgba(0, 0, 0, 0.05); */
+  border-bottom-left-radius: 26px;
+  border-bottom-right-radius: 26px;
+  font-size: 1em;
+}
+
+.Container:focus-visible {
+  border-color: transparent;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0), 0 0px 0px 2px #4c9ffe;
+}
+
+.Container.shadow {
+  box-shadow: 0 1px 10px 0 rgba(34, 33, 81, 0.1);
+}
+
+.Container.horizontal {
+  width: 100%;
+}
+
+.Container.horizontal ul {
+  grid-auto-flow: column;
+}
+
+.Container.unstyled {
+  overflow: visible;
+  background-color: transparent !important;
+  border: none !important;
+}
+
+.Container.hover {
+  background-color: rgb(235, 235, 235, 1);
+}
+
+.Container.scrollable ul {
+  overflow-y: auto;
+}
+
+.Container.placeholder {
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  color: rgba(0, 0, 0, 0.5);
+  background-color: transparent;
+  border-style: dashed;
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+.Container.placeholder:hover {
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+.Container ul {
+  display: grid;
+  grid-gap: 10px;
+  grid-template-columns: repeat(var(--columns, 1), 1fr);
+  list-style: none;
+  padding: 20px;
+  margin: 0;
+}
+
+.Header {
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  padding: 5px 20px;
+  padding-right: 8px;
+  align-items: center;
+  font-size: 19px;
+  font-weight: 600;
+  justify-content: space-between;
+  background-color: #f8f8f8;
+  border-top-left-radius: 26px;
+  border-top-right-radius: 26px;
+}
+
+.Header span {
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  color: #9D9D9D;
+}
+
+.Header:hover .Actions > * {
+  opacity: 1 !important;
+}
+
+.Actions {
+  display: flex;
+}
+
+.Actions > *:first-child:not(:last-child) {
+  opacity: 0;
+}
+
+.Actions > *:first-child:not(:last-child):focus-visible {
+  opacity: 1;
+}

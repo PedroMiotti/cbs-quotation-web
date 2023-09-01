@@ -1,8 +1,11 @@
+import { Composition } from "./Composition";
+
 export interface Quotation {
-  id: number;
-  name: string;
-  type: string;
-  tag?: string;
+    id: number;
+    name: string;
+    type: string;
+    tag?: string;
+    Composition: Composition[];
 }
 
 export interface QuotationTable {
@@ -14,4 +17,4 @@ export interface QuotationTable {
   tag?: string;
 }
 
-export interface CreateQuotationRequest extends Omit<Quotation, "id"> {}
+export interface CreateQuotationRequest extends Omit<Quotation, "id" | 'Composition'> {}
