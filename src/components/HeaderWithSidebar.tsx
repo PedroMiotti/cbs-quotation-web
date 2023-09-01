@@ -42,7 +42,7 @@ const Tabs = [
   {
     name: "Cotações",
     icon: HiOutlineDocument,
-    route: "/",
+    route: "/quotation",
   },
   {
     name: "Produtos",
