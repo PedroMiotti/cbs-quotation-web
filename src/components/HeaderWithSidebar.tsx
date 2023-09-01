@@ -246,6 +246,7 @@ const SidebarContent = ({
           display="flex"
           justifyContent="center"
           alignItems="center"
+          onClick={() => navigate("/quotation?action=create")}
         >
           <Icon as={AiOutlinePlusCircle} mr={2} fontSize="20px" /> Nova Cotação
         </Button>

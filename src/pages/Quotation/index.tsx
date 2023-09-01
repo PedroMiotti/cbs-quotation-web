@@ -17,7 +17,6 @@ import {
 import { AiOutlinePlusCircle } from "react-icons/ai";
 import Modal from "../../components/Modal";
 import { useForm } from "react-hook-form";
-import { fetchAllBrands } from "../../api/Brand";
 import { CreateQuotationRequest, QuotationTable } from "../../types/Quotation";
 import {
   createQuotation,
@@ -25,6 +24,7 @@ import {
   fetchAllQuotations,
 } from "../../api/Quotation";
 import { InfoOutlineIcon } from "@chakra-ui/icons";
+import { useSearchParams } from "react-router-dom";
 
 interface Brand {
   id: number;
@@ -78,11 +78,10 @@ const Actions = ({
 const columnHelper = createColumnHelper<QuotationTable>();
 
 const Quotation = () => {
+  let [searchParams, setSearchParams] = useSearchParams();
+
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [pageCount, setPageCount] = useState(0);
-  const [isUsersRequestPending, setIsUsersRequestPending] = useState(false);
   const [quotations, setQuotations] = useState<QuotationTable[]>([]);
-  const [brands, setBrands] = useState<Brand[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedType, setSelectedType] = useState<QuotationType | null>(null);
 
@@ -156,25 +155,10 @@ const Quotation = () => {
     []
   );
 
-  useEffect(() => {
-    const fetchBrands = async () => {
-      try {
-        const brandsData = await fetchAllBrands();
-        setBrands(brandsData);
-      } catch (error) {
-        console.error("Error fetching brands:", error);
-      }
-    };
-
-    fetchBrands();
-  }, []);
-
   const handleDelete = async (quotationId: number) => {
     try {
-      // Chamar a função para deletar a cotação
       await deleteQuotation(quotationId);
 
-      // Atualizar a lista de cotações após a exclusão
       const updatedQuotations = quotations.filter((q) => q.id !== quotationId);
       setQuotations(updatedQuotations);
 
@@ -205,11 +189,14 @@ const Quotation = () => {
         tag: formData.tag,
       };
 
-      const createdQuotation = await createQuotation(quotationData);
+      await createQuotation(quotationData);
       const updatedProducts = await fetchAllQuotations();
       setQuotations(updatedProducts);
-      onClose();
+
+      handleCloseModal();
+      setSelectedType(null);
       reset();
+
       toast({
         title: "Cotação criada com sucesso",
         description: "Cotação criada com sucesso",
@@ -217,7 +204,7 @@ const Quotation = () => {
         duration: 3000,
         isClosable: true,
       });
-      setSelectedType(null);
+
     } catch (error) {
       console.error("Error creating product:", error);
       toast({
@@ -232,6 +219,15 @@ const Quotation = () => {
 
   const handleTagClick = (type: QuotationType) => {
     setSelectedType(type === selectedType ? null : type);
+  };
+
+  useEffect(() => {
+    if (searchParams.get("action")) onOpen();
+  }, [searchParams]);
+
+  const handleCloseModal = () => {
+    if(searchParams.get("action") === "create") setSearchParams("");
+    onClose();
   };
 
   return (
@@ -269,7 +265,7 @@ const Quotation = () => {
       />
       <Modal
         isOpen={isOpen}
-        onClose={onClose}
+        onClose={handleCloseModal}
         title={"Criar Cotação"}
         textButton={"Criar"}
         onSubmit={handleSubmit(onSubmit)}
