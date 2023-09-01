@@ -17,7 +17,7 @@ import {
 import { AiOutlinePlusCircle } from "react-icons/ai";
 import Modal from "../../components/Modal";
 import { useForm } from "react-hook-form";
-import { CreateQuotationRequest, QuotationTable } from "../../types/Quotation";
+import { CreateQuotationRequest, QuotationTable, QuotationType } from "../../types/Quotation";
 import {
   createQuotation,
   deleteQuotation,
@@ -35,11 +35,6 @@ interface FormData {
   name: string;
   type: string;
   tag?: string;
-}
-
-enum QuotationType {
-  CHRISTMAS = "CHRISTMAS",
-  CUSTOM = "CUSTOM",
 }
 
 const mapQuotationType = (type: QuotationType) => {
@@ -183,9 +178,11 @@ const Quotation = () => {
 
   const onSubmit = async (formData: FormData) => {
     try {
+      if(!selectedType) return;
+      
       const quotationData: CreateQuotationRequest = {
         name: formData.name,
-        type: selectedType ? mapQuotationType(selectedType) : "",
+        type: selectedType,
         tag: formData.tag,
       };
 
