@@ -1,7 +1,8 @@
 import { ComponentType } from "react";
 import Products from "./pages/Products";
 import Brands from "./pages/Brands";
-import Quotation from "./pages/Quotation";
+import Quotations from "./pages/Quotation";
+import Quotation from "./pages/Quotation/[id]";
 
 interface Route {
   name: string;
@@ -19,6 +20,11 @@ const routes: Route[] = [
     name: "Brands",
     path: "/marcas",
     component: Brands,
+  },
+  {
+    name: "Cotações",
+    path: "/quotation",
+    component: Quotations,
   },
   {
     name: "Cotações",
