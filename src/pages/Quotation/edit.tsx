@@ -194,7 +194,7 @@ import {
       setCompositionId(id)
     };
   
-    const handleSaveItem = (item: Product, quantity: number) => {
+    const handleSaveItem = (product: Product, quantity: number) => {
       if (!compositionId) return;
       
       const composition = compositions.find(
@@ -202,15 +202,29 @@ import {
       );
   
       if (!composition) return;
+
+      if(composition.CompositionItems.find((compositionItem) => compositionItem.product_id === product.id)) {
+        toast({
+          title: "Erro",
+          description: `Este item já está na composição.`,
+          status: "error",
+          duration: 6000,
+          position: "top-right",
+          isClosable: true,
+        });
+        return;
+      }
   
-      addItemToComposition(compositionId, item.id, quantity).then(() => {
+      addItemToComposition(compositionId, product.id, quantity).then((data) => {
+        console.log(data)
         const updatedCompositions = compositions.map((composition) => {
           if (composition.id === compositionId) {
             const compositionItem = {
-              product_id: item.id,
+              id: data.id, // Todo review 
+              product_id: product.id,
               composition_id: compositionId,
               quantity: quantity,
-              Product: item,  
+              Product: product,  
             }
     
             return {
@@ -228,9 +242,9 @@ import {
       
     }
   
-    const handleMoveItem = async (itemId: number, compositionId: number, newCompositionId: number) => {
+    const handleMoveItem = async (itemId: number, newCompositionId: number) => {
       if(compositionId === newCompositionId) return;
-      await moveItem(itemId, compositionId, newCompositionId);
+      await moveItem(itemId, newCompositionId);
     }
   
     const closeModal = () => {
@@ -290,7 +304,7 @@ import {
           px={5}
         >
           <Text fontSize={"2xl"} fontWeight={"semibold"}>
-            # Natal 2022
+            # {quotation?.name} {quotation?.tag}
           </Text>
           <Button
             variant="outline"

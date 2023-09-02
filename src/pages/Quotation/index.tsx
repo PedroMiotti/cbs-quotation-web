@@ -179,7 +179,7 @@ const Quotation = () => {
   const onSubmit = async (formData: FormData) => {
     try {
       if(!selectedType) return;
-      
+
       const quotationData: CreateQuotationRequest = {
         name: formData.name,
         type: selectedType,
@@ -200,6 +200,7 @@ const Quotation = () => {
         status: "success",
         duration: 3000,
         isClosable: true,
+        position: "top-right"
       });
 
     } catch (error) {
@@ -210,6 +211,7 @@ const Quotation = () => {
         status: "error",
         duration: 3000,
         isClosable: true,
+        position: "top-right"
       });
     }
   };

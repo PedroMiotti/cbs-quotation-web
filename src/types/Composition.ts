@@ -13,6 +13,7 @@ export interface Composition {
 export interface CreateCompositionRequest extends Omit<Composition, 'id' | 'CompositionItems' | 'created_at' | 'updated_at'> {}
 
 export interface CompositionItem {
+    id: number;
     product_id: number;
     composition_id: number;
     quantity: number;

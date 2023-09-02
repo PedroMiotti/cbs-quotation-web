@@ -11,7 +11,7 @@ interface QuotationBoardProps {
   handleDelete: (id: number) => void;
   handleEdit: (id: number) => void;
   handleAddItem: (id: number) => void;
-  handleMoveItem: (itemId: number, compositionId: number, newCompositionId: number) => void;
+  handleMoveItem: (itemId: number, compositionId: number) => void;
 }
 
 const QuotationBoard = ({data, setData, handleDelete, handleEdit, handleAddItem, handleMoveItem}: QuotationBoardProps) => {
@@ -21,7 +21,7 @@ const QuotationBoard = ({data, setData, handleDelete, handleEdit, handleAddItem,
       const currentContainerId = active?.data.current?.parent;
 
       const activeContainer = data.find((quotation) => quotation.id === +currentContainerId);
-      const activeCard: CompositionItem | undefined = activeContainer?.CompositionItems.find((item) => item.product_id === active?.id)
+      const activeCard: CompositionItem | undefined = activeContainer?.CompositionItems.find((item) => item.id === active?.id)
 
       return activeCard;
     },
@@ -55,27 +55,27 @@ const QuotationBoard = ({data, setData, handleDelete, handleEdit, handleAddItem,
           (quotation) => quotation.id === nextLane
         );
 
-        const currentQuotationItem = currentQuotationLane?.CompositionItems.find(
-          (item) => item.product_id === currentItemId
+        const currentItem = currentQuotationLane?.CompositionItems.find(
+          (item) => item.id === currentItemId
         );
 
         const isAlreadyInLane = nextQuotationLane?.CompositionItems.find(
-          (item) => item.product_id === currentQuotationItem?.product_id
+          (item) => item.id === currentItem?.id
         );
 
-        if(!currentQuotationItem || isAlreadyInLane) return
+        if(!currentItem || isAlreadyInLane) return
 
         const updatedQuotations = data.map((quotation) => {
           if (quotation.id === nextLane) {
             return {
               ...quotation,
-              CompositionItems: [...quotation.CompositionItems, currentQuotationItem],
+              CompositionItems: [...quotation.CompositionItems, currentItem],
             };
           } else if (quotation.id === +currentLane) {
             return {
               ...quotation,
               CompositionItems: quotation.CompositionItems.filter(
-                (item) => item.product_id !== currentItemId
+                (item) => item.id !== currentItemId
               ),
             };
           } else {
@@ -85,7 +85,7 @@ const QuotationBoard = ({data, setData, handleDelete, handleEdit, handleAddItem,
 
         setActive(null);
         setData(updatedQuotations);
-        handleMoveItem(+currentLane, +currentItemId, +nextLane!);
+        handleMoveItem(+currentItemId, +nextLane!);
       }}
       onDragCancel={() => {
         setActive(null);

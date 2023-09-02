@@ -120,7 +120,7 @@ const QuotationLane = ({
         </Flex>
 
         <ul role="application">
-          {items.map(({ Product, product_id: itemId, quantity }, key) => (
+          {items.map(({ Product, id: itemId, quantity }, key) => (
             <ProductCard
               id={itemId}
               product={Product}

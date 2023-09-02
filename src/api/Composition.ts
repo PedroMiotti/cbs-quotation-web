@@ -16,18 +16,19 @@ export const updateComposition = async (id: number, composition: Partial<CreateC
 }
 
 export const addItemToComposition = async (composition_id: number, product_id: number, quantity: number) => {
-    await Api.post(`/composition/item/add`, { composition_id, product_id, quantity });
+    const response =  await Api.post(`/composition/${composition_id}/item/add`, { product_id, quantity });
+    return response.data;
 }
 
-export const removeItemFromComposition = async (composition_id: number, product_id: number) => {
-    await Api.post(`/composition/item/remove`, { composition_id, product_id });
+export const removeItemFromComposition = async (itemId: number) => {
+    await Api.delete(`/composition/item/${itemId}/remove`);
 }
 
 export const updateItemQuantityInComposition = async (composition_id: number, product_id: number, quantity: number) => {
     await Api.patch(`/composition/${composition_id}/item/${product_id}/update`, { quantity });
 }
 
-export const moveItem = async (composition_id: number, product_id: number, new_composition_id: number) => {
-    await Api.patch(`/composition/${composition_id}/item/${product_id}/move`, { new_composition_id });
+export const moveItem = async (item_id: number, new_composition_id: number) => {
+    await Api.patch(`/composition/${new_composition_id}/item/${item_id}/move`);
 }
 
