@@ -24,3 +24,10 @@ export const deleteQuotation = async (quotationId: number) => {
   const response = await Api.delete(`/quotation/${quotationId}`);
   return response.data;
 };
+
+export const exportQuotation = async (quotationId: number) => {
+  const response = await Api.get(`/quotation/${quotationId}/export`, {
+    responseType: "blob",
+  });
+  return response.data;
+}
