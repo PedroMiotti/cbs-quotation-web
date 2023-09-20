@@ -44,6 +44,7 @@ export interface QuotationLane {
 
 const Quotation = () => {
   let { id } = useParams();
+
   const [compositions, setCompositions] = useState<Composition[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isLoadingActionOnComposition, setIsLoadingActionOnComposition] =
@@ -79,17 +80,6 @@ const Quotation = () => {
       .then((data) => data)
       .finally(() => setIsLoading(false));
   }, [id]);
-
-  useEffect(() => {
-    getProducts().then((data) => setProducts(data));
-    getQuotation().then((data) => {
-      setQuotation(data);
-
-      if (data?.Composition.length) {
-        setCompositions(data.Composition);
-      }
-    });
-  }, []);
 
   const handleCreateComposition = () => {
     if (!compositionForm.name || !compositionForm.margin) {
@@ -239,6 +229,8 @@ const Quotation = () => {
 
       setCompositions(updatedCompositions);
     });
+
+    onCloseAddItemModal()
   };
 
   const handleMoveItem = async (itemId: number, newCompositionId: number) => {
@@ -272,7 +264,7 @@ const Quotation = () => {
     const url = window.URL.createObjectURL(new Blob([response]));
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", `cotacao-${quotation.name}.xlsx`);
+    link.setAttribute("download", `cotacao-${quotation.name.toLowerCase()}.xlsx`);
     document.body.appendChild(link);
     link.click();
 
@@ -280,6 +272,17 @@ const Quotation = () => {
 
     if (link.parentNode) link.parentNode.removeChild(link);
   };
+
+  useEffect(() => {
+    getProducts().then((data) => setProducts(data));
+    getQuotation().then((data) => {
+      setQuotation(data);
+
+      if (data?.Composition.length) {
+        setCompositions(data.Composition);
+      }
+    });
+  }, []);
 
   return (
     <Flex direction="column" h="full">
@@ -361,7 +364,9 @@ const Quotation = () => {
 
       <Box height="full" overflow="auto">
         {isLoading ? (
-          <Spinner /> // Todo add skeleton
+          <Flex align="center" justify="center" p={10}>
+            <Spinner />
+          </Flex>
         ) : (
           <QuotationBoard
             handleAddItem={handleAddItem}
@@ -371,15 +376,6 @@ const Quotation = () => {
             handleEdit={handleEditComposition}
             handleMoveItem={handleMoveItem}
           />
-          // <MultipleContainers
-          //   containerStyle={{
-          //     overflowX: 'auto',
-          //     maxHeight: '80vh',
-          //   }}
-          //   itemCount={15}
-          //   scrollable
-          //   compositions={compositions}
-          // />
         )}
       </Box>
 
@@ -440,7 +436,6 @@ const AddItemModal = ({
     if (!selectedProduct || !itemFormModal?.quantity) return;
 
     submit(selectedProduct, itemFormModal?.quantity);
-    closeModal();
   };
 
   useEffect(() => {
