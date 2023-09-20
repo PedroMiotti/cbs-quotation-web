@@ -21,7 +21,11 @@ import { AiOutlineDelete, AiOutlinePlusCircle } from "react-icons/ai";
 import { Composition, CompositionItem } from "../types/Composition";
 import { formatToBrlCurrency } from "../utils/formatCurrency";
 import { useEffect } from "react";
-import { SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
+import {
+  SortableContext,
+  rectSortingStrategy,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { createPortal } from "react-dom";
 
 const dropAnimationConfig = {
@@ -56,7 +60,7 @@ const QuotationLane = ({
   handleDelete,
   handleEdit,
   handleAddItem,
-  setData
+  setData,
 }: QuotationLaneProps) => {
   const { setNodeRef } = useDroppable({
     id,
@@ -72,135 +76,117 @@ const QuotationLane = ({
 
   return (
     <>
-      <SortableContext items={items} strategy={rectSortingStrategy}>
+    <SortableContext items={items} strategy={verticalListSortingStrategy}>
+      <Flex
+        flex="3"
+        padding="5"
+        flexDirection="column"
+        minW="450px"
+        ref={setNodeRef}
+      >
         <Flex
-          flex="3"
-          padding="5"
+          backgroundColor="#f8f8f8"
+          borderRadius="8"
+          flex="1"
+          padding="6"
           flexDirection="column"
-          minW="450px"
-          ref={setNodeRef}
+          overflow={"scroll"}
         >
-          <Flex
-            backgroundColor="#f8f8f8"
-            borderRadius="8"
-            flex="1"
-            padding="6"
-            flexDirection="column"
-            overflow={"scroll"}
-          >
-            <Flex align="center" justifyContent="space-between" mb={4}>
-              <Flex align="baseline" gap={2}>
-                <Text
-                  fontWeight="semibold"
-                  fontSize="20px"
-                  fontFamily="Inter, sans-serif"
-                >
-                  {title}
-                </Text>
-                <Text
-                  fontWeight="normal"
-                  fontSize="sm"
-                  color="#9D9D9D"
-                  fontFamily="Inter, sans-serif"
-                >
-                  {items.length}
-                </Text>
-              </Flex>
-              <Flex>
-                <IconButton
-                  aria-label="edit composition"
-                  bg="transparent"
-                  onClick={() => handleAddItem(id)}
-                  icon={<AiOutlinePlusCircle />}
-                />
-                <Menu>
-                  <MenuButton
-                    as={IconButton}
-                    aria-label="Options"
-                    icon={<BsThreeDots />}
-                    bg="transparent"
-                  />
-                  <MenuList>
-                    <MenuItem
-                      onClick={() => handleEdit(id)}
-                      icon={<EditIcon />}
-                    >
-                      Editar
-                    </MenuItem>
-                    <MenuItem
-                      onClick={() => handleDelete(id)}
-                      icon={<AiOutlineDelete fontSize="15px" />}
-                    >
-                      Excluir
-                    </MenuItem>
-                  </MenuList>
-                </Menu>
-              </Flex>
+          <Flex align="center" justifyContent="space-between" mb={4}>
+            <Flex align="baseline" gap={2}>
+              <Text
+                fontWeight="semibold"
+                fontSize="20px"
+                fontFamily="Inter, sans-serif"
+              >
+                {id} {title}
+              </Text>
+              <Text
+                fontWeight="normal"
+                fontSize="sm"
+                color="#9D9D9D"
+                fontFamily="Inter, sans-serif"
+              >
+                {items.length}
+              </Text>
             </Flex>
-
-            <Flex overflowX="hidden" direction="column">
-              <ul role="application">
-                {items.map(({ Product, id: itemId, quantity }, key) => (
-                  <ProductCard
-                    setData={setData}
-                    id={itemId}
-                    product={Product}
-                    quantity={quantity}
-                    key={key}
-                    index={key}
-                    parent={id}
-                  />
-                ))}
-                <Flex
-                  onClick={() => handleAddItem(id)}
-                  padding="4"
-                  backgroundColor="white"
-                  align="center"
-                  justifyContent="center"
-                  margin="2"
-                  gap={3}
-                  borderRadius={"13px"}
-                  _hover={{ cursor: "pointer", bg: "#f8f8f8" }}
-                >
-                  <Text fontSize="lg" fontWeight="600" color="gray.500">
-                    <Icon as={AiOutlinePlusCircle} mr={2} fontSize="20px" />{" "}
-                    Adicionar produto
-                  </Text>
-                </Flex>
-              </ul>
+            <Flex>
+              <IconButton
+                aria-label="edit composition"
+                bg="transparent"
+                onClick={() => handleAddItem(id)}
+                icon={<AiOutlinePlusCircle />}
+              />
+              <Menu>
+                <MenuButton
+                  as={IconButton}
+                  aria-label="Options"
+                  icon={<BsThreeDots />}
+                  bg="transparent"
+                />
+                <MenuList>
+                  <MenuItem onClick={() => handleEdit(id)} icon={<EditIcon />}>
+                    Editar
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() => handleDelete(id)}
+                    icon={<AiOutlineDelete fontSize="15px" />}
+                  >
+                    Excluir
+                  </MenuItem>
+                </MenuList>
+              </Menu>
             </Flex>
           </Flex>
 
-          <Divider />
-
-          <Flex backgroundColor="#f8f8f8" borderRadius="8" px={6} py={3}>
-            <Text fontSize="lg" fontWeight="600" mt={4}>
-              Total
-            </Text>
-
-            <Text fontSize="lg" fontWeight="600" mt={4} ml="auto">
-              {formatToBrlCurrency(
-                subtotal * (composition.margin / 100) + subtotal
-              )}
-            </Text>
+          <Flex overflowX="hidden" direction="column">
+            <ul style={{ listStyle: "none" }} role="application">
+              {items.map(({ Product, id: itemId, quantity }, key) => (
+                <ProductCard
+                  setData={setData}
+                  id={itemId}
+                  product={Product}
+                  quantity={quantity}
+                  key={key}
+                  index={key}
+                  parent={id}
+                />
+              ))}
+              <Flex
+                onClick={() => handleAddItem(id)}
+                padding="4"
+                backgroundColor="white"
+                align="center"
+                justifyContent="center"
+                margin="2"
+                gap={3}
+                borderRadius={"13px"}
+                _hover={{ cursor: "pointer", bg: "#f8f8f8" }}
+              >
+                <Text fontSize="lg" fontWeight="600" color="gray.500">
+                  <Icon as={AiOutlinePlusCircle} mr={2} fontSize="20px" />{" "}
+                  Adicionar produto
+                </Text>
+              </Flex>
+            </ul>
           </Flex>
         </Flex>
-      </SortableContext>
-      {createPortal(
-        <DragOverlay dropAnimation={dropAnimationConfig} zIndex={10}>
-          {activeItem ? (
-            <ProductCard
-              setData={setData}
-              id={activeItem.id}
-              product={activeItem.Product}
-              quantity={activeItem.quantity}
-              index={items.findIndex((item) => item.id === activeItem.id)}
-              parent={id}
-            />
-          ) : null}
-        </DragOverlay>,
-        document.body
-      )}
+
+        <Divider />
+
+        <Flex backgroundColor="#f8f8f8" borderRadius="8" px={6} py={3}>
+          <Text fontSize="lg" fontWeight="600" mt={4}>
+            Total
+          </Text>
+
+          <Text fontSize="lg" fontWeight="600" mt={4} ml="auto">
+            {formatToBrlCurrency(
+              subtotal * (composition.margin / 100) + subtotal
+            )}
+          </Text>
+        </Flex>
+      </Flex>
+    </SortableContext>
     </>
   );
 };

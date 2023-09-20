@@ -12,6 +12,8 @@ import {
   Box,
   Input,
   Select,
+  InputGroup,
+  InputLeftElement,
 } from "@chakra-ui/react";
 import { AiOutlinePlusCircle } from "react-icons/ai";
 import {
@@ -23,12 +25,13 @@ import Modal from "../../components/Modal";
 import { useForm } from "react-hook-form";
 import { fetchAllBrands } from "../../api/Brand";
 import { createProduct, fetchAllProducts } from "../../api/Product";
+import { formatToBrlCurrency } from "../../utils/formatCurrency";
 
 interface FormData {
   name: string;
   brand: number;
   weight: string;
-  price: number;
+  price: string;
 }
 
 interface Brand {
@@ -57,8 +60,7 @@ const columnHelper = createColumnHelper<Product>();
 
 const Products = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [pageCount, setPageCount] = useState(0);
-  const [isUsersRequestPending, setIsUsersRequestPending] = useState(false);
+  const [isActionRequestPending, setIsActionRequestPending] = useState(false);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -151,28 +153,46 @@ const Products = () => {
   }, []);
 
   const onSubmit = async (formData: FormData) => {
+    const formattedPrice = formData.price.includes(",")
+      ? formData.price.replace(",", ".")
+      : formData.price;
+
     try {
       const productData: CreateProductRequest = {
         name: formData.name,
         brand_id: formData.brand,
         weight: formData.weight,
         price: {
-          price: +formData.price,
+          price: +formattedPrice,
           is_current: true,
         },
       };
 
-      const createdProduct = await createProduct(productData);
-      const updatedProducts = await fetchAllProducts();
-      setProducts(updatedProducts);
+      setIsActionRequestPending(true);
+      await createProduct(productData).then((data) => {
+        setProducts((prev) => {
+          return [
+            ...prev,
+            {
+              ...productData,
+              Brand: { id: data.brand_id, name: data.Brand.name },
+              id: data.id,
+              created_at: data.created_at,
+              ProductPrice: data.ProductPrice
+            },
+          ];
+        });
+      }).finally(() => setIsActionRequestPending(false));
+
       onClose();
       reset();
       toast({
-        title: "Produto criado com sucesso",
+        title: "Sucesso",
         description: "Produto criado com sucesso",
         status: "success",
         duration: 3000,
         isClosable: true,
+        position: 'top-right'
       });
     } catch (error) {
       console.error("Error creating product:", error);
@@ -187,7 +207,7 @@ const Products = () => {
   };
 
   return (
-    <Flex direction="column" >
+    <Flex direction="column">
       <Flex
         direction={{ sm: "column", md: "row" }}
         justify="space-between"
@@ -225,6 +245,7 @@ const Products = () => {
         onClose={onClose}
         title={"Criar Produto"}
         textButton={"Criar"}
+        isLoading={isActionRequestPending}
         onSubmit={handleSubmit(onSubmit)}
       >
         <form>
@@ -232,7 +253,7 @@ const Products = () => {
             <Text mb="8px">Nome</Text>
             <Input
               {...register("name", { required: true })}
-              placeholder="Ex: Arroz"
+              placeholder="Arroz"
               focusBorderColor="#83B735"
             />
             {errors.name && (
@@ -259,19 +280,21 @@ const Products = () => {
               <Text mb="8px">Gramagem</Text>
               <Input
                 {...register("weight", { required: true })}
-                placeholder="Ex: 100gr"
+                placeholder="100gr"
                 focusBorderColor="#83B735"
               />
             </Box>
           </Stack>
           <Box mt={"4"}>
             <Text mb="8px">Preço</Text>
-
-            <Input
-              {...register("price", { required: true })}
-              placeholder="Ex: 15.50"
-              focusBorderColor="#83B735"
-            />
+            <InputGroup>
+              <InputLeftElement pointerEvents="none">R$</InputLeftElement>
+              <Input
+                {...register("price", { required: true })}
+                placeholder="15,50"
+                focusBorderColor="#83B735"
+              />
+            </InputGroup>
           </Box>
         </form>
       </Modal>

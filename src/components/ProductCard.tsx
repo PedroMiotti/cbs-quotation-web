@@ -56,6 +56,7 @@ const ProductCard = ({
 
   const style = {
     transform: CSS.Translate.toString(transform),
+    transition
   };
 
   const currentPrice =
@@ -106,7 +107,7 @@ const ProductCard = ({
       overflow={"hidden"}
       gap={3}
       transform={style.transform}
-      transition={transition}
+      transition={style.transition}
       ref={setNodeRef}
       zIndex={isDragging ? "100" : "auto"}
       opacity={isDragging ? "0.3" : "1"}
@@ -115,7 +116,7 @@ const ProductCard = ({
       <Flex direction="column" gap={3} {...listeners} {...attributes}>
         <Flex align="center" justifyContent="space-between">
           <Text fontSize="lg" fontWeight="600">
-            {product.name} {product?.Brand?.name} {product.weight}
+            {id} {product.name} {product?.Brand?.name} {product.weight}
           </Text>
         </Flex>
         <Text fontSize="sm" fontWeight="600">

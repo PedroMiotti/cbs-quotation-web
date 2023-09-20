@@ -116,7 +116,7 @@ const Quotation = () => {
           isClosable: true,
         });
       })
-      .finally(() => setIsLoadingActionOnComposition(true));
+      .finally(() => setIsLoadingActionOnComposition(false));
   };
 
   const handleDeleteComposition = (id: number) => {
@@ -234,8 +234,8 @@ const Quotation = () => {
   };
 
   const handleMoveItem = async (itemId: number, newCompositionId: number) => {
-    if (compositionId === newCompositionId) return;
-    if (!compositionId || !itemId) return;
+    console.log({ itemId, newCompositionId })
+    if (!newCompositionId || !itemId) return;
     await moveItem(itemId, newCompositionId);
   };
 
@@ -278,7 +278,7 @@ const Quotation = () => {
     getQuotation().then((data) => {
       setQuotation(data);
 
-      if (data?.Composition.length) {
+      if (data && data?.Composition.length) {
         setCompositions(data.Composition);
       }
     });

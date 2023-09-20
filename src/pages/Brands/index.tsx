@@ -24,24 +24,6 @@ interface FormData {
   name: string;
 }
 
-const data: Brand[] = [
-  {
-    id: 1,
-    name: "Solito",
-    created_at: "10/08/2022",
-  },
-  {
-    id: 2,
-    name: "Bauducco",
-    created_at: "10/08/2022",
-  },
-  {
-    id: 3,
-    name: "Milka",
-    created_at: "10/08/2022",
-  },
-];
-
 const columnHelper = createColumnHelper<Brand>();
 
 const Brands = () => {
@@ -121,6 +103,7 @@ const Brands = () => {
           description: "Marca criada com sucesso!",
           status: "success",
           position: "top-right",
+          isClosable: true,
         });
 
         await fetchBrands(0, 0);

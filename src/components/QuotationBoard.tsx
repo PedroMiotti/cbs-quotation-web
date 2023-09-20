@@ -4,15 +4,23 @@ import {
   DragEndEvent,
   KeyboardSensor,
   PointerSensor,
+  closestCenter,
   rectIntersection,
+  useDroppable,
   useSensor,
   useSensors,
+  MeasuringStrategy,
+  TouchSensor,
+  DragOverlay,
+  defaultDropAnimationSideEffects,
 } from "@dnd-kit/core";
 import { Flex, useToast } from "@chakra-ui/react";
 import { useEffect, useMemo, useState } from "react";
 import QuotationLaneComponent from "./QuotationLane";
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { Composition, CompositionItem } from "../types/Composition";
+import { coordinateGetter as multipleContainersCoordinateGetter } from "./CoordinateGetter";
+import ProductCard from "./ProductCard";
 
 interface QuotationBoardProps {
   data: Composition[];
@@ -55,19 +63,40 @@ const QuotationBoard = ({
 
   const sensors = useSensors(
     useSensor(PointerSensor),
+    useSensor(TouchSensor),
     useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
+      coordinateGetter: multipleContainersCoordinateGetter,
     })
   );
+
+  const findContainer = (itemId: number) => {
+    const container = data.find((quotation) =>
+      quotation.CompositionItems.find((item) => item.id === itemId)
+    );
+    return container;
+  }
 
   return (
     <DndContext
       sensors={sensors}
+      measuring={{
+        droppable: {
+          strategy: MeasuringStrategy.Always,
+        },
+      }}
       onDragStart={({ active }) => {
         setActive(active);
       }}
-      collisionDetection={rectIntersection}
+      collisionDetection={closestCenter}
       onDragEnd={(e: DragEndEvent) => {
+
+        console.log(e)
+        if(e?.over?.id === e.active.id) {
+          setActive(null)
+          setActiveItem(null)
+          return;
+        }
+        
         const isContainer = !e.over?.data?.current;
 
         const nextLane = isContainer
@@ -93,7 +122,11 @@ const QuotationBoard = ({
         );
 
         if (isAlreadyInLane) {
-          if (nextLane === currentLane) return;
+          if (nextLane === currentLane) {
+            setActiveItem(null);
+            setActive(null);
+            return;
+          };
 
           toast({
             title: "Item já adicionado",
@@ -106,7 +139,11 @@ const QuotationBoard = ({
           return;
         }
 
-        if (!currentItem) return;
+        if (!currentItem) {
+          setActiveItem(null);
+          setActive(null);
+          return;
+        }
 
         const updatedQuotations = data.map((quotation) => {
           if (quotation.id === nextLane) {
@@ -127,89 +164,76 @@ const QuotationBoard = ({
         });
 
         setActive(null);
+        setActiveItem(null);
         setData(updatedQuotations);
         handleMoveItem(+currentItemId, +nextLane!);
       }}
-      // onDragOver={(e: DragEndEvent) => {
-      //   const { active, over } = e;
-
-      //   const isContainer = !over?.data?.current;
-
-      //   const currentContainerId = active.data.current?.parent;
-      //   const overContainerId = isContainer
-      //     ? over?.id
-      //     : over.data.current?.parent;
-
-      //   if (over && !isContainer && active.id !== over.id) {
-      //     console.log('Active ' + active.id)
-      //     console.log('Over ' + over?.id)
-      //     setData((items: Composition[]) => {
-      //       const activeContainer = items.find(
-      //         (quotation) => quotation.id === +currentContainerId
-      //       );
-      //       const overContainer = items.find(
-      //         (quotation) => quotation.id === +overContainerId
-      //       );
-
-      //       if (!activeContainer || !overContainer) return items;
-
-      //       const activeIndex = activeContainer.CompositionItems.findIndex(
-      //         (item: any) => item.id === active.id
-      //       );
-      //       const overIndex = overContainer.CompositionItems.findIndex(
-      //         (item: any) => item.id === over.id
-      //       );
-
-      //       const isBelowOverItem =
-      //         over &&
-      //         active.rect.current.translated &&
-      //         active.rect.current.translated.top >
-      //           over.rect.top + over.rect.height;
-
-      //       const modifier = isBelowOverItem ? 1 : 0;
-
-      //       const newIndex =
-      //         overIndex >= 0
-      //           ? overIndex + modifier
-      //           : overContainer.CompositionItems.length + 1;
-
-      //           console.log({newIndex})
-
-      //       const updatedPositionsOver = [
-      //         ...overContainer.CompositionItems.slice(0, newIndex),
-      //         activeContainer.CompositionItems[activeIndex],
-      //         ...overContainer.CompositionItems.slice(newIndex),
-      //       ];
-
-      //       const updatedQuotations = items.map((quotation) => {
-      //         if (quotation.id === +overContainerId) {
-      //           return {
-      //             ...quotation,
-      //             CompositionItems: updatedPositionsOver,
-      //           };
-      //         }
-
-      //         else if (quotation.id === +currentContainerId) {
-      //           return {
-      //             ...quotation,
-      //             CompositionItems: quotation.CompositionItems.filter(
-      //               (item) => item.id !== active.id
-      //             ),
-      //           };
-      //         }
-
-      //         return quotation;
-      //       });
-
-      //       // console.log({data})
-      //       // console.log({updatedQuotations})
-
-      //       return updatedQuotations;
-      //     });
-      //   }
-      // }}
+      onDragOver={(e: DragEndEvent) => {
+        // const { active, over } = e;
+        // const isContainer = !over?.data?.current;
+        // const currentContainerId = active.data.current?.parent;
+        // const overContainerId = isContainer
+        //   ? over?.id
+        //   : over.data.current?.parent;
+        // if (over && !isContainer && active.id !== over.id) {
+        //   console.log('Active ' + active.id)
+        //   console.log('Over ' + over?.id)
+        //   setData((items: Composition[]) => {
+        //     const activeContainer = items.find(
+        //       (quotation) => quotation.id === +currentContainerId
+        //     );
+        //     const overContainer = items.find(
+        //       (quotation) => quotation.id === +overContainerId
+        //     );
+        //     if (!activeContainer || !overContainer) return items;
+        //     const activeIndex = activeContainer.CompositionItems.findIndex(
+        //       (item: any) => item.id === active.id
+        //     );
+        //     const overIndex = overContainer.CompositionItems.findIndex(
+        //       (item: any) => item.id === over.id
+        //     );
+        //     const isBelowOverItem =
+        //       over &&
+        //       active.rect.current.translated &&
+        //       active.rect.current.translated.top >
+        //         over.rect.top + over.rect.height;
+        //     const modifier = isBelowOverItem ? 1 : 0;
+        //     const newIndex =
+        //       overIndex >= 0
+        //         ? overIndex + modifier
+        //         : overContainer.CompositionItems.length + 1;
+        //         console.log({newIndex})
+        //     const updatedPositionsOver = [
+        //       ...overContainer.CompositionItems.slice(0, newIndex),
+        //       activeContainer.CompositionItems[activeIndex],
+        //       ...overContainer.CompositionItems.slice(newIndex),
+        //     ];
+        //     const updatedQuotations = items.map((quotation) => {
+        //       if (quotation.id === +overContainerId) {
+        //         return {
+        //           ...quotation,
+        //           CompositionItems: updatedPositionsOver,
+        //         };
+        //       }
+        //       else if (quotation.id === +currentContainerId) {
+        //         return {
+        //           ...quotation,
+        //           CompositionItems: quotation.CompositionItems.filter(
+        //             (item) => item.id !== active.id
+        //           ),
+        //         };
+        //       }
+        //       return quotation;
+        //     });
+        //     // console.log({data})
+        //     // console.log({updatedQuotations})
+        //     return updatedQuotations;
+        //   });
+        // }
+      }}
       onDragCancel={() => {
         setActive(null);
+        setActiveItem(null)
       }}
     >
       <Flex overflowX="scroll" overflowY="hidden" height="630px">
@@ -228,8 +252,61 @@ const QuotationBoard = ({
           />
         ))}
       </Flex>
+
+      <DragOverlay dropAnimation={dropAnimationConfig}>
+        {active && activeItem ? (
+          <ProductCard
+            setData={setData}
+            id={activeItem.id}
+            product={activeItem.Product}
+            quantity={activeItem.quantity}
+            index={findContainer(activeItem.id)?.CompositionItems.findIndex((item) => item.id === activeItem.id) ?? 0}
+            parent={activeItem.composition_id}
+          />
+        ) : null}
+      </DragOverlay>
+
+      {active && activeItem ? <Trash id={activeItem.id} /> : null}
     </DndContext>
   );
 };
+
+const dropAnimationConfig = {
+  sideEffects: defaultDropAnimationSideEffects({
+    styles: {
+      active: {
+        opacity: "0.4",
+      },
+    },
+  }),
+};
+
+function Trash({ id }: { id: number }) {
+  const { setNodeRef, isOver } = useDroppable({
+    id,
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        position: "fixed",
+        left: "50%",
+        marginLeft: -150,
+        bottom: 20,
+        width: 300,
+        height: 60,
+        borderRadius: 5,
+        border: "1px solid",
+        borderColor: isOver ? "red" : "#DDD",
+      }}
+    >
+      Solte aqui para excluir
+    </div>
+  );
+}
 
 export default QuotationBoard;
