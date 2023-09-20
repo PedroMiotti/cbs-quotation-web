@@ -71,7 +71,7 @@ const QuotationLane = ({
   }, 0);
 
   return (
-    <div>
+    <>
       <SortableContext items={items} strategy={rectSortingStrategy}>
         <Flex
           flex="3"
@@ -86,6 +86,7 @@ const QuotationLane = ({
             flex="1"
             padding="6"
             flexDirection="column"
+            overflow={"scroll"}
           >
             <Flex align="center" justifyContent="space-between" mb={4}>
               <Flex align="baseline" gap={2}>
@@ -94,7 +95,7 @@ const QuotationLane = ({
                   fontSize="20px"
                   fontFamily="Inter, sans-serif"
                 >
-                  {id} {title}
+                  {title}
                 </Text>
                 <Text
                   fontWeight="normal"
@@ -171,6 +172,7 @@ const QuotationLane = ({
           </Flex>
 
           <Divider />
+
           <Flex backgroundColor="#f8f8f8" borderRadius="8" px={6} py={3}>
             <Text fontSize="lg" fontWeight="600" mt={4}>
               Total
@@ -199,7 +201,7 @@ const QuotationLane = ({
         </DragOverlay>,
         document.body
       )}
-    </div>
+    </>
   );
 };
 

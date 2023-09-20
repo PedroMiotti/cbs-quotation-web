@@ -212,7 +212,7 @@ const QuotationBoard = ({
         setActive(null);
       }}
     >
-      <Flex overflowX="scroll" height="630px">
+      <Flex overflowX="scroll" overflowY="hidden" height="630px">
         {data.map((lane: Composition) => (
           <QuotationLaneComponent
             setData={setData}

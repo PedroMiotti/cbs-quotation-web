@@ -115,7 +115,7 @@ const ProductCard = ({
       <Flex direction="column" gap={3} {...listeners} {...attributes}>
         <Flex align="center" justifyContent="space-between">
           <Text fontSize="lg" fontWeight="600">
-            {id} {product.name} {product?.Brand?.name} {product.weight}
+            {product.name} {product?.Brand?.name} {product.weight}
           </Text>
         </Flex>
         <Text fontSize="sm" fontWeight="600">
