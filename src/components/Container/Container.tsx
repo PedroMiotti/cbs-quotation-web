@@ -43,9 +43,6 @@ const Container = forwardRef<HTMLDivElement, ContainerProps>(
     ref
   ) => {
     const Component = onClick ? 'button' : 'div';
-
-    //@ts-ignore
-    console.log()
     return (
       <Component
         {...props}

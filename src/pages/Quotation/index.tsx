@@ -143,7 +143,6 @@ const Quotation = () => {
       fetchAllQuotations()
         .then((data) => {
           setQuotations(data);
-          console.log(data);
         })
         .finally(() => setIsLoading(false));
     },

@@ -24,8 +24,8 @@ export const removeItemFromComposition = async (itemId: number) => {
     await Api.delete(`/composition/item/${itemId}/remove`);
 }
 
-export const updateItemQuantityInComposition = async (composition_id: number, product_id: number, quantity: number) => {
-    await Api.patch(`/composition/${composition_id}/item/${product_id}/update`, { quantity });
+export const updateItemQuantityInComposition = async (item_id: number, quantity: number) => {
+    await Api.patch(`/composition/item/${item_id}/update`, { quantity: +quantity });
 }
 
 export const moveItem = async (item_id: number, new_composition_id: number) => {

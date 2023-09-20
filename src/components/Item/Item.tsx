@@ -1,14 +1,30 @@
-import React, {useEffect} from 'react';
-import classNames from 'classnames';
-import type {DraggableSyntheticListeners} from '@dnd-kit/core';
-import type {Transform} from '@dnd-kit/utilities';
+import React, { useEffect, useState } from "react";
+import classNames from "classnames";
+import type { DraggableSyntheticListeners } from "@dnd-kit/core";
+import type { Transform } from "@dnd-kit/utilities";
 
-import Remove from './components/Remove';
-import Handle from './components/Handle';
+import Remove from "./components/Remove";
+import Handle from "./components/Handle";
 
-import styles from './item.module.css';
+import styles from "./item.module.css";
+import { EditIcon } from "@chakra-ui/icons";
+import {
+  Popover,
+  PopoverTrigger,
+  IconButton,
+  PopoverContent,
+  PopoverArrow,
+  PopoverCloseButton,
+  useDisclosure,
+  Flex,
+  Text
+} from "@chakra-ui/react";
+import { formatToBrlCurrency } from "../../utils/formatCurrency";
+import { Product } from "../../types/Product";
+import { CompositionItem } from "../../types/Composition";
 
 export interface Props {
+  item: CompositionItem
   dragOverlay?: boolean;
   color?: string;
   disabled?: boolean;
@@ -35,9 +51,9 @@ export interface Props {
     listeners: DraggableSyntheticListeners;
     ref: React.Ref<HTMLElement>;
     style: React.CSSProperties | undefined;
-    transform: Props['transform'];
-    transition: Props['transition'];
-    value: Props['value'];
+    transform: Props["transform"];
+    transition: Props["transition"];
+    value: Props["value"];
   }): React.ReactElement;
 }
 
@@ -45,6 +61,7 @@ const Item = React.memo(
   React.forwardRef<HTMLLIElement, Props>(
     (
       {
+        item,
         color,
         dragOverlay,
         dragging,
@@ -67,17 +84,23 @@ const Item = React.memo(
       },
       ref
     ) => {
+      const [name, setName] = useState("");
       useEffect(() => {
         if (!dragOverlay) {
           return;
         }
 
-        document.body.style.cursor = 'grabbing';
+        document.body.style.cursor = "grabbing";
 
         return () => {
-          document.body.style.cursor = '';
+          document.body.style.cursor = "";
         };
       }, [dragOverlay]);
+
+      const { onOpen, onClose, isOpen } = useDisclosure();
+
+      const currentPrice =
+      item.Product?.ProductPrice?.find((price) => price.is_current)?.price ?? 0;
 
       return renderItem ? (
         renderItem({
@@ -106,21 +129,21 @@ const Item = React.memo(
               ...wrapperStyle,
               transition: [transition, wrapperStyle?.transition]
                 .filter(Boolean)
-                .join(', '),
-              '--translate-x': transform
+                .join(", "),
+              "--translate-x": transform
                 ? `${Math.round(transform.x)}px`
                 : undefined,
-              '--translate-y': transform
+              "--translate-y": transform
                 ? `${Math.round(transform.y)}px`
                 : undefined,
-              '--scale-x': transform?.scaleX
+              "--scale-x": transform?.scaleX
                 ? `${transform.scaleX}`
                 : undefined,
-              '--scale-y': transform?.scaleY
+              "--scale-y": transform?.scaleY
                 ? `${transform.scaleY}`
                 : undefined,
-              '--index': index,
-              '--color': color,
+              "--index": index,
+              "--color": color,
             } as React.CSSProperties
           }
           ref={ref}
@@ -141,6 +164,21 @@ const Item = React.memo(
             tabIndex={!handle ? 0 : undefined}
           >
             {value}
+
+            <Flex align="center" justifyContent="space-between">
+              <Text fontSize="lg" fontWeight="600">
+                {item.Product.name} {item.Product?.Brand?.name} {item.Product.weight}
+              </Text>
+            </Flex>
+
+            <Flex justify="space-between" align="center" px={1}>
+              <Text fontSize="sm" fontWeight="600">
+                {formatToBrlCurrency(currentPrice)}
+              </Text>
+              <Text fontSize="sm" color="#9D9D9D">
+                {item.quantity} un
+              </Text>
+            </Flex>
             <span className={styles.Actions}>
               {onRemove ? (
                 <Remove className={styles.Remove} onClick={onRemove} />

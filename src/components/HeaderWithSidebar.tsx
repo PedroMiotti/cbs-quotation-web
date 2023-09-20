@@ -4,6 +4,8 @@ import {
   AccordionButton,
   AccordionItem,
   AccordionPanel,
+  Avatar,
+  Badge,
   Box,
   BoxProps,
   Button,
@@ -37,6 +39,7 @@ import { FiMenu } from "react-icons/fi";
 import { HiOutlineDocument } from "react-icons/hi";
 import { BsHash, BsListUl } from "react-icons/bs";
 import { FiLogOut } from "react-icons/fi";
+import { useQuotation } from "../context/Quotation";
 
 const Tabs = [
   {
@@ -56,44 +59,44 @@ const Tabs = [
   },
 ];
 
-const quotations: Quotation[] = [
-  {
-    id: 1,
-    name: "2022",
-    type: "CHRISTMAS",
-    Composition: []
-  },
-  {
-    id: 2,
-    name: "2021",
-    type: "CHRISTMAS",
-    Composition: []
-  },
-  {
-    id: 3,
-    name: "2023",
-    type: "CHRISTMAS",
-    Composition: []
-  },
-  {
-    id: 4,
-    name: "Ambev",
-    type: "CUSTOM",
-    Composition: []
-  },
-  {
-    id: 5,
-    name: "Vale",
-    type: "CUSTOM",
-    Composition: []
-  },
-  {
-    id: 6,
-    name: "Brasuco",
-    type: "CUSTOM",
-    Composition: []
-  },
-];
+// const quotations: Quotation[] = [
+//   {
+//     id: 1,
+//     name: "2022",
+//     type: "CHRISTMAS",
+//     Composition: [],
+//   },
+//   {
+//     id: 2,
+//     name: "2021",
+//     type: "CHRISTMAS",
+//     Composition: [],
+//   },
+//   {
+//     id: 3,
+//     name: "2023",
+//     type: "CHRISTMAS",
+//     Composition: [],
+//   },
+//   {
+//     id: 4,
+//     name: "Ambev",
+//     type: "CUSTOM",
+//     Composition: [],
+//   },
+//   {
+//     id: 5,
+//     name: "Vale",
+//     type: "CUSTOM",
+//     Composition: [],
+//   },
+//   {
+//     id: 6,
+//     name: "Brasuco",
+//     type: "CUSTOM",
+//     Composition: [],
+//   },
+// ];
 
 export default function SidebarWithHeader({
   children,
@@ -207,163 +210,203 @@ const SidebarContent = ({
 }: SidebarProps) => {
   const navigate = useNavigate();
 
+  const { quotations } = useQuotation();
+
+  const sortedQuotations = quotations.sort((a, b) => {
+    if (a.updated_at > b.updated_at) return 1;
+    if (a.updated_at < b.updated_at) return -1;
+
+    return 0;
+  });
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/auth");
-  }
-  
+  };
+
   return (
     <Box
       bg={useColorModeValue("#F7F7F7", "gray.900")}
       w={isSidebarOpen ? { base: "full", md: "60" } : "80px"}
       pos="fixed"
       h="full"
+      overflow="auto"
       {...rest}
     >
-      <Flex
-        alignItems="center"
-        mx="3"
-        justifyContent="space-between"
-        mt={5}
-        mb={7}
-      >
-        <Image
-          src={logo}
-          alt="Knower Logo"
-          maxHeight={isSidebarOpen ? 100 : 50}
-        />
-
-        <CloseButton display={{ base: "flex", md: "none" }} onClick={onClose} />
-      </Flex>
-      <Flex my={6} justify={"center"}>
-        <Button
-          bg={"#83B735"}
-          color={"#FFFFFF"}
-          w={"full"}
-          height="45px"
-          mx={3}
-          _hover={{ bg: "#96c255" }}
-          display="flex"
-          justifyContent="center"
+      <Flex direction="column" h="full">
+        <Flex
           alignItems="center"
-          onClick={() => navigate("/quotation?action=create")}
+          mx="3"
+          justifyContent="space-between"
+          mt={5}
+          mb={7}
         >
-          <Icon as={AiOutlinePlusCircle} mr={2} fontSize="20px" /> Nova Cotação
-        </Button>
-      </Flex>
-      {Tabs.map((link) => (
-        <Stack key={link.name} spacing={0}>
-          <NavItem
-            key={`nav-item-${link.name}`}
-            color="gray.500"
-            fontWeight="semibold"
-            fontSize="md"
-            route={link.route}
-            icon={link.icon}
-            onItemClick={onItemClick}
-            isSidebarOpen={isSidebarOpen}
-          >
-            {link.name}
-          </NavItem>
-        </Stack>
-      ))}
-      <Container mt={5}>
-        <Accordion
-          allowMultiple
-          defaultIndex={[0, 1]}
-          width="100%"
-          maxW="lg"
-          bg="#F7F7F7"
-          rounded="lg"
-        >
-          <AccordionItem border="none">
-            <AccordionButton
-              display="flex"
-              alignItems="center"
-              p={1}
-              _hover={{ bg: "gray.100" }}
-            >
-              <ChevronDownIcon fontSize="20px" color="gray.300" />
-              <Text fontSize="sm" ml={1} color="gray.400">
-                NATAL
-              </Text>
-            </AccordionButton>
-            <AccordionPanel pb={4}>
-              {quotations
-                .filter((quotation) => quotation.type === "CHRISTMAS")
-                .map((quotation) => (
-                  <Link
-                    key={quotation.id}
-                    href={`/quotation/edit/${quotation.id}`}
-                    display="flex"
-                    alignItems="center"
-                    gap={2}
-                    mb={3}
-                    py={1}
-                    borderRadius={4}
-                    _hover={{ bg: "gray.100" }}
-                  >
-                    <Icon as={BsHash} color="gray.500" />
-                    <Text color="gray.500" fontWeight="semibold" fontSize="md">
-                      {quotation.name}
-                    </Text>
-                  </Link>
-                ))}
-            </AccordionPanel>
-          </AccordionItem>
-          <AccordionItem border="none">
-            <AccordionButton
-              display="flex"
-              alignItems="center"
-              p={1}
-              _hover={{ bg: "gray.100" }}
-              color="gray.800"
-            >
-              <ChevronDownIcon fontSize="20px" color="gray.300" />
-              <Text fontSize="sm" color="gray.400" ml={1}>
-                PERSONALIZADAS
-              </Text>
-            </AccordionButton>
-            <AccordionPanel pb={4}>
-              {quotations
-                .filter((quotation) => quotation.type === "CUSTOM")
-                .map((quotation) => (
-                  <Link
-                    key={quotation.id}
-                    href={`/quotation/edit/${quotation.id}`}
-                    display="flex"
-                    alignItems="center"
-                    gap={2}
-                    mb={3}
-                    py={1}
-                    borderRadius={4}
-                    _hover={{ bg: "gray.100" }}
-                  >
-                    <Icon as={BsHash} color="gray.500" />
-                    <Text color="gray.500" fontWeight="semibold" fontSize="md">
-                      {quotation.name}
-                    </Text>
-                  </Link>
-                ))}
-            </AccordionPanel>
-          </AccordionItem>
-        </Accordion>
-      </Container>
+          <Image
+            src={logo}
+            alt="Knower Logo"
+            maxHeight={isSidebarOpen ? 100 : 50}
+          />
 
-      <Box
-        display="flex"
-        alignItems="center"
-        position={"fixed"}
-        bottom={8}
-        left={6}
-        _hover={{ bg: "gray.100", cursor: "pointer" }}
-        onClick={handleLogout}
-      >
-        <Icon as={FiLogOut} color="gray.500" mr={2} />
-        <Text color="gray.500" fontWeight="semibold" fontSize="md">
-          Sair
-        </Text>
-      </Box>
+          <CloseButton
+            display={{ base: "flex", md: "none" }}
+            onClick={onClose}
+          />
+        </Flex>
+        <Box flex="1" overflow="auto">
+          <Flex my={6} justify={"center"}>
+            <Button
+              bg={"#83B735"}
+              color={"#FFFFFF"}
+              w={"full"}
+              height="45px"
+              mx={3}
+              _hover={{ bg: "#96c255" }}
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              onClick={() => navigate("/quotation?action=create")}
+            >
+              <Icon as={AiOutlinePlusCircle} mr={2} fontSize="20px" /> Nova
+              Cotação
+            </Button>
+          </Flex>
+          {Tabs.map((link) => (
+            <Stack key={link.name} spacing={0}>
+              <NavItem
+                key={`nav-item-${link.name}`}
+                color="gray.500"
+                fontWeight="semibold"
+                fontSize="md"
+                route={link.route}
+                icon={link.icon}
+                onItemClick={onItemClick}
+                isSidebarOpen={isSidebarOpen}
+              >
+                {link.name}
+              </NavItem>
+            </Stack>
+          ))}
+          <Container mt={5}>
+            <Accordion
+              allowMultiple
+              defaultIndex={[0, 1]}
+              width="100%"
+              maxW="lg"
+              bg="#F7F7F7"
+              rounded="lg"
+            >
+              <AccordionItem border="none">
+                <AccordionButton
+                  display="flex"
+                  alignItems="center"
+                  p={1}
+                  _hover={{ bg: "gray.100" }}
+                >
+                  <ChevronDownIcon fontSize="20px" color="gray.300" />
+                  <Text fontSize="sm" ml={1} color="gray.400">
+                    NATAL
+                  </Text>
+                </AccordionButton>
+                <AccordionPanel pb={4}>
+                  {sortedQuotations
+                    .filter((quotation) => quotation.type === "CHRISTMAS")
+                    .map((quotation) => (
+                      <Link
+                        key={quotation.id}
+                        href={`/quotation/edit/${quotation.id}`}
+                        display="flex"
+                        alignItems="center"
+                        gap={2}
+                        mb={3}
+                        py={1}
+                        borderRadius={4}
+                        _hover={{ bg: "gray.100" }}
+                      >
+                        <Icon as={BsHash} color="gray.500" />
+                        <Text
+                          color="gray.500"
+                          fontWeight="semibold"
+                          fontSize="md"
+                        >
+                          {quotation.name}
+                        </Text>
+                      </Link>
+                    ))}
+                </AccordionPanel>
+              </AccordionItem>
+              <AccordionItem border="none">
+                <AccordionButton
+                  display="flex"
+                  alignItems="center"
+                  p={1}
+                  _hover={{ bg: "gray.100" }}
+                  color="gray.800"
+                >
+                  <ChevronDownIcon fontSize="20px" color="gray.300" />
+                  <Text fontSize="sm" color="gray.400" ml={1}>
+                    PERSONALIZADAS
+                  </Text>
+                </AccordionButton>
+                <AccordionPanel pb={4}>
+                  {sortedQuotations
+                    .filter((quotation) => quotation.type === "CUSTOM")
+                    .map((quotation) => (
+                      <Link
+                        key={quotation.id}
+                        href={`/quotation/edit/${quotation.id}`}
+                        display="flex"
+                        alignItems="center"
+                        gap={2}
+                        mb={3}
+                        py={1}
+                        borderRadius={4}
+                        _hover={{ bg: "gray.100" }}
+                      >
+                        <Icon as={BsHash} color="gray.500" />
+                        <Text
+                          color="gray.500"
+                          fontWeight="semibold"
+                          fontSize="md"
+                          align="center"
+                        >
+                          {quotation.name} <Badge>{quotation.tag}</Badge>
+                        </Text>
+                      </Link>
+                    ))}
+                </AccordionPanel>
+              </AccordionItem>
+            </Accordion>
+          </Container>
+        </Box>
+
+        <Box>
+          <Flex
+            pl={3}
+            py={2}
+            align="center"
+            borderTop="1px solid rgba(255, 255, 255, 0.2)"
+            _hover={{ cursor: "pointer" }}
+          >
+            <Stack direction="row" justify={'space-between'} align="center" bg="#f3f3f3" w="full" p={2} borderRadius="xl">
+              <Flex align="center" gap={3}>
+                <Avatar
+                  size="sm"
+                />
+                <Flex direction="column">
+                  <Text color="gray.500" fontWeight="semibold" fontSize="md">
+                    CBS Empório
+                  </Text>
+                  <Text color="gray.400" fontSize="xs">
+                    Administrador
+                  </Text>
+                </Flex>
+              </Flex>
+
+              <Icon as={FiLogOut} color="gray.500" mr={2} onClick={handleLogout}/>
+            </Stack>
+          </Flex>
+        </Box>
+      </Flex>
     </Box>
   );
 };

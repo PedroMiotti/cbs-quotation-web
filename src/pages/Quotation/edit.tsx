@@ -8,16 +8,10 @@ import {
     useToast,
     useDisclosure,
     Input,
-    InputGroup,
-    InputLeftAddon,
-    InputRightAddon,
     FormControl,
     FormLabel,
-    InputLeftElement,
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
     Stack,
+    Badge,
   } from "@chakra-ui/react";
   import { AiOutlinePlusCircle } from "react-icons/ai";
   import QuotationBoard from "../../components/QuotationBoard";
@@ -216,11 +210,10 @@ import {
       }
   
       addItemToComposition(compositionId, product.id, quantity).then((data) => {
-        console.log(data)
         const updatedCompositions = compositions.map((composition) => {
           if (composition.id === compositionId) {
             const compositionItem = {
-              id: data.id, // Todo review 
+              id: data.id, 
               product_id: product.id,
               composition_id: compositionId,
               quantity: quantity,
@@ -244,6 +237,7 @@ import {
   
     const handleMoveItem = async (itemId: number, newCompositionId: number) => {
       if(compositionId === newCompositionId) return;
+      if(!compositionId || !itemId) return;
       await moveItem(itemId, newCompositionId);
     }
   
@@ -304,7 +298,7 @@ import {
           px={5}
         >
           <Text fontSize={"2xl"} fontWeight={"semibold"}>
-            # {quotation?.name} {quotation?.tag}
+            # {quotation?.name} <Badge>{quotation?.tag}</Badge>
           </Text>
           <Button
             variant="outline"
@@ -319,7 +313,7 @@ import {
           </Button>
         </Flex>
   
-        <Box height="full">
+        <Box height="full" overflow="auto">
           {isLoading ? (
             <Spinner /> // Todo add skeleton
           ) : (
@@ -331,6 +325,15 @@ import {
               handleEdit={handleEditComposition}
               handleMoveItem={handleMoveItem}
             />
+            // <MultipleContainers
+            //   containerStyle={{
+            //     overflowX: 'auto',
+            //     maxHeight: '80vh',
+            //   }}
+            //   itemCount={15}
+            //   scrollable
+            //   compositions={compositions}
+            // />
           )}
         </Box>
   

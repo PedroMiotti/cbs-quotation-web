@@ -24,12 +24,10 @@ const Authentication = () => {
   const toast = useToast();
 
   const handleAuthentication = () => {
-    console.log({env: process.env.REACT_APP_PASSWORD})
-    console.log(password)
     if (password === process.env.REACT_APP_PASSWORD) {
       const token = Math.random().toString(36).substr(2);
       localStorage.setItem("token", token);
-      navigate("/");
+      navigate("/quotation");
     } else {
       toast({
         title: "Senha incorreta",
