@@ -16,13 +16,14 @@ import {
   DragOverlay,
   defaultDropAnimationSideEffects,
 } from "@dnd-kit/core";
-import { Flex, useToast } from "@chakra-ui/react";
+import { Flex, useToast, Icon } from "@chakra-ui/react";
 import { useEffect, useMemo, useState } from "react";
 import QuotationLaneComponent from "./QuotationLane";
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { Composition, CompositionItem } from "../types/Composition";
 import { coordinateGetter as multipleContainersCoordinateGetter } from "./CoordinateGetter";
 import ProductCard from "./ProductCard";
+import { FiTrash } from "react-icons/fi";
 
 interface QuotationBoardProps {
   data: Composition[];
@@ -31,6 +32,7 @@ interface QuotationBoardProps {
   handleEdit: (id: number) => void;
   handleAddItem: (id: number) => void;
   handleMoveItem: (itemId: number, compositionId: number) => void;
+  handleDeleteItem: (itemId: number) => void;
 }
 
 const dropAnimationConfig = {
@@ -50,6 +52,7 @@ const QuotationBoard = ({
   handleEdit,
   handleAddItem,
   handleMoveItem,
+  handleDeleteItem,
 }: QuotationBoardProps) => {
   const [active, setActive] = useState<Active | null>(null);
   const [activeItem, setActiveItem] = useState<CompositionItem | null>(null);
@@ -105,7 +108,6 @@ const QuotationBoard = ({
       }}
       onDragEnd={(e: DragEndEvent) => {
         const { active, over } = e;
-
         if (!over) {
           setActive(null);
           return;
@@ -116,6 +118,40 @@ const QuotationBoard = ({
 
         const activeContainer = findContainer(id);
         const overContainer = findContainer(overId);
+
+        if (overId === "trash") {
+          handleDeleteItem(+id);
+          setActive(null);
+          const updatedPositionsActive =
+            activeContainer?.CompositionItems.filter(
+              (item: any) => item.id !== id
+            );
+
+          setData((prev: any) => {
+            const updatedQuotations = prev.map((quotation: any) => {
+              if (quotation.id === activeContainer.id) {
+                return {
+                  ...quotation,
+                  CompositionItems: updatedPositionsActive,
+                };
+              }
+              return quotation;
+            });
+
+            return updatedQuotations;
+          });
+
+          toast({
+            title: "Item excluído",
+            description: "O item foi excluído da composição",
+            status: "success",
+            duration: 2000,
+            isClosable: true,
+            position: "top-right",
+          });
+
+          return;
+        }
 
         if (
           !activeContainer ||
@@ -160,7 +196,6 @@ const QuotationBoard = ({
         setActive(null);
       }}
       onDragOver={(e: DragEndEvent) => {
-
         const { active, over } = e;
         const { id } = active;
         const { id: overId } = over;
@@ -171,7 +206,8 @@ const QuotationBoard = ({
         if (
           !activeContainer ||
           !overContainer ||
-          activeContainer.id === overContainer.id
+          activeContainer.id === overContainer.id ||
+          overId === "trash"
         ) {
           return;
         }
@@ -276,8 +312,8 @@ const QuotationBoard = ({
           />
         ) : null}
       </DragOverlay>
-
-      {active ? <Trash id={active?.id} /> : null}
+      
+      {active ? <Trash id="trash" /> : null}
     </DndContext>
   );
 };
@@ -288,25 +324,26 @@ function Trash({ id }: { id: number }) {
   });
 
   return (
-    <div
+    <Flex
       ref={setNodeRef}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        position: "fixed",
-        left: "50%",
-        marginLeft: -150,
-        bottom: 20,
-        width: 300,
-        height: 60,
-        borderRadius: 5,
-        border: "1px solid",
-        borderColor: isOver ? "red" : "#DDD",
-      }}
+      position="fixed"
+      align="center"
+      justify="center"
+      left="50%"
+      marginLeft={"-150px"}
+      bottom={'20px'}
+      width={'300px'}
+      height={'80px'}
+      borderRadius={5}
+      border="1px solid"
+      borderColor={isOver ? "red" : "#DDD"}
+      color={isOver ? "red" : "black"}
+      bg="white"
+      gap={4}
     >
+      <Icon as={FiTrash} mt='1px' size="20px" color={isOver ? "red" : "black"} />
       Solte aqui para excluir
-    </div>
+    </Flex>
   );
 }
 

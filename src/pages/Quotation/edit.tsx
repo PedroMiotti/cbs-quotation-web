@@ -27,6 +27,7 @@ import {
   createComposition,
   deleteComposition,
   moveItem,
+  removeItemFromComposition,
   updateComposition,
 } from "../../api/Composition";
 import Modal from "../../components/Modal";
@@ -35,14 +36,6 @@ import { fetchAllProducts } from "../../api/Product";
 import { ReactSearchAutocomplete } from "react-search-autocomplete";
 import "../../styles/global.css";
 import { formatToBrlCurrency } from "../../utils/formatCurrency";
-
-// export type QuotationLane = {
-//   [key: string]: {
-//     id: number;
-//     title: string;
-//     items: CompositionItem[];
-//   };
-// };
 
 const Quotation = () => {
   let { id } = useParams();
@@ -240,6 +233,11 @@ const Quotation = () => {
     await moveItem(itemId, newCompositionId);
   };
 
+  const handleDeleteItem = async (itemId: number) => {
+    if (!itemId) return;
+    await removeItemFromComposition(itemId);
+  };
+
   const closeModal = () => {
     setCompositionForm({ id: undefined, name: "", margin: 0 });
     onClose();
@@ -379,6 +377,7 @@ const Quotation = () => {
             handleDelete={handleDeleteComposition}
             handleEdit={handleEditComposition}
             handleMoveItem={handleMoveItem}
+            handleDeleteItem={handleDeleteItem}
           />
         )}
       </Box>
