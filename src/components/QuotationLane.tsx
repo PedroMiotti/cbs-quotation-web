@@ -39,11 +39,10 @@ const dropAnimationConfig = {
 };
 
 interface QuotationLaneProps {
-  id: number;
+  id: string;
   title: string;
   composition: Composition;
   items: CompositionItem[];
-  activeItem: CompositionItem | null;
   handleDelete: (id: number) => void;
   handleEdit: (id: number) => void;
   handleAddItem: (id: number) => void;
@@ -56,7 +55,6 @@ const QuotationLane = ({
   title,
   items,
   composition,
-  activeItem,
   handleDelete,
   handleEdit,
   handleAddItem,
@@ -74,9 +72,12 @@ const QuotationLane = ({
     return acc + currentPrice * item.quantity;
   }, 0);
 
+
+  const compositionId = parseInt(id.split(":")[1]);
+
   return (
     <>
-    <SortableContext items={items} strategy={verticalListSortingStrategy}>
+    <SortableContext id={id} items={items} strategy={verticalListSortingStrategy}>
       <Flex
         flex="3"
         padding="5"
@@ -99,7 +100,7 @@ const QuotationLane = ({
                 fontSize="20px"
                 fontFamily="Inter, sans-serif"
               >
-                {id} {title}
+                {title}
               </Text>
               <Text
                 fontWeight="normal"
@@ -114,7 +115,7 @@ const QuotationLane = ({
               <IconButton
                 aria-label="edit composition"
                 bg="transparent"
-                onClick={() => handleAddItem(id)}
+                onClick={() => handleAddItem(compositionId)}
                 icon={<AiOutlinePlusCircle />}
               />
               <Menu>
@@ -125,11 +126,11 @@ const QuotationLane = ({
                   bg="transparent"
                 />
                 <MenuList>
-                  <MenuItem onClick={() => handleEdit(id)} icon={<EditIcon />}>
+                  <MenuItem onClick={() => handleEdit(compositionId)} icon={<EditIcon />}>
                     Editar
                   </MenuItem>
                   <MenuItem
-                    onClick={() => handleDelete(id)}
+                    onClick={() => handleDelete(compositionId)}
                     icon={<AiOutlineDelete fontSize="15px" />}
                   >
                     Excluir
@@ -153,7 +154,7 @@ const QuotationLane = ({
                 />
               ))}
               <Flex
-                onClick={() => handleAddItem(id)}
+                onClick={() => handleAddItem(compositionId)}
                 padding="4"
                 backgroundColor="white"
                 align="center"

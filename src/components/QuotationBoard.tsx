@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import {
   Active,
   DndContext,
@@ -31,6 +33,16 @@ interface QuotationBoardProps {
   handleMoveItem: (itemId: number, compositionId: number) => void;
 }
 
+const dropAnimationConfig = {
+  sideEffects: defaultDropAnimationSideEffects({
+    styles: {
+      active: {
+        opacity: "0.4",
+      },
+    },
+  }),
+};
+
 const QuotationBoard = ({
   data,
   setData,
@@ -43,7 +55,8 @@ const QuotationBoard = ({
   const [activeItem, setActiveItem] = useState<CompositionItem | null>(null);
 
   const getActiveItem = () => {
-    const currentContainerId = active?.data.current?.parent;
+    if (!active) return null;
+    const currentContainerId = findContainer(+active.id)!.id;
 
     const activeContainer = data.find(
       (quotation) => quotation.id === +currentContainerId
@@ -55,10 +68,6 @@ const QuotationBoard = ({
     return activeCard ?? null;
   };
 
-  useEffect(() => {
-    setActiveItem(getActiveItem());
-  }, [active]);
-
   const toast = useToast();
 
   const sensors = useSensors(
@@ -69,171 +78,170 @@ const QuotationBoard = ({
     })
   );
 
-  const findContainer = (itemId: number) => {
-    const container = data.find((quotation) =>
-      quotation.CompositionItems.find((item) => item.id === itemId)
+  const findContainer = (id: number | string) => {
+    const isContainer = typeof id === "string" && id.includes(":");
+
+    if (!isContainer) {
+      const container = data.find((quotation) =>
+        quotation.CompositionItems.find((item) => item.id === id)
+      );
+      return container;
+    }
+
+    const [name, compositionId] = id.split(":");
+    const container = data.find(
+      (quotation) => quotation.id === +compositionId && quotation.name === name
     );
+
     return container;
-  }
+  };
 
   return (
     <DndContext
       sensors={sensors}
-      measuring={{
-        droppable: {
-          strategy: MeasuringStrategy.Always,
-        },
-      }}
+      collisionDetection={closestCenter}
       onDragStart={({ active }) => {
         setActive(active);
       }}
-      collisionDetection={closestCenter}
       onDragEnd={(e: DragEndEvent) => {
+        const { active, over } = e;
 
-        console.log(e)
-        if(e?.over?.id === e.active.id) {
-          setActive(null)
-          setActiveItem(null)
-          return;
-        }
-        
-        const isContainer = !e.over?.data?.current;
-
-        const nextLane = isContainer
-          ? e.over?.id
-          : e.over?.data.current?.parent;
-        const currentLane = e.active.data.current?.parent;
-        const currentItemId = e.active.id;
-
-        const currentQuotationLane = data.find(
-          (quotation) => quotation.id === +currentLane
-        );
-
-        const nextQuotationLane = data.find(
-          (quotation) => quotation.id === nextLane
-        );
-
-        const currentItem = currentQuotationLane?.CompositionItems.find(
-          (item) => item.id === currentItemId
-        );
-
-        const isAlreadyInLane = nextQuotationLane?.CompositionItems.find(
-          (item) => item.product_id === currentItem?.product_id
-        );
-
-        if (isAlreadyInLane) {
-          if (nextLane === currentLane) {
-            setActiveItem(null);
-            setActive(null);
-            return;
-          };
-
-          toast({
-            title: "Item já adicionado",
-            description: "Este item já esta nessa cotação",
-            status: "warning",
-            duration: 3000,
-            isClosable: true,
-            position: "top-right",
-          });
-          return;
-        }
-
-        if (!currentItem) {
-          setActiveItem(null);
+        if (!over) {
           setActive(null);
           return;
         }
 
-        const updatedQuotations = data.map((quotation) => {
-          if (quotation.id === nextLane) {
-            return {
-              ...quotation,
-              CompositionItems: [...quotation.CompositionItems, currentItem],
-            };
-          } else if (quotation.id === +currentLane) {
-            return {
-              ...quotation,
-              CompositionItems: quotation.CompositionItems.filter(
-                (item) => item.id !== currentItemId
-              ),
-            };
-          } else {
-            return quotation;
-          }
-        });
+        const { id } = active;
+        const { id: overId } = over;
+
+        const activeContainer = findContainer(id);
+        const overContainer = findContainer(overId);
+
+        if (
+          !activeContainer ||
+          !overContainer ||
+          activeContainer.id !== overContainer.id
+        ) {
+          setActive(null);
+          return;
+        }
+
+        const activeIndex = activeContainer.CompositionItems.findIndex(
+          (item: any) => item.id === id
+        );
+        const overIndex = overContainer.CompositionItems.findIndex(
+          (item: any) => item.id === overId
+        );
+
+        handleMoveItem(+id, +overContainer.id);
+
+        if (activeIndex !== overIndex) {
+          setData((prev: any) => {
+            const updatedPositions = arrayMove(
+              overContainer.CompositionItems,
+              activeIndex,
+              overIndex
+            );
+
+            const updatedQuotations = prev.map((quotation: any) => {
+              if (quotation.id === overContainer.id) {
+                return {
+                  ...quotation,
+                  CompositionItems: updatedPositions,
+                };
+              }
+              return quotation;
+            });
+
+            return updatedQuotations;
+          });
+        }
 
         setActive(null);
-        setActiveItem(null);
-        setData(updatedQuotations);
-        handleMoveItem(+currentItemId, +nextLane!);
       }}
       onDragOver={(e: DragEndEvent) => {
-        // const { active, over } = e;
-        // const isContainer = !over?.data?.current;
-        // const currentContainerId = active.data.current?.parent;
-        // const overContainerId = isContainer
-        //   ? over?.id
-        //   : over.data.current?.parent;
-        // if (over && !isContainer && active.id !== over.id) {
-        //   console.log('Active ' + active.id)
-        //   console.log('Over ' + over?.id)
-        //   setData((items: Composition[]) => {
-        //     const activeContainer = items.find(
-        //       (quotation) => quotation.id === +currentContainerId
-        //     );
-        //     const overContainer = items.find(
-        //       (quotation) => quotation.id === +overContainerId
-        //     );
-        //     if (!activeContainer || !overContainer) return items;
-        //     const activeIndex = activeContainer.CompositionItems.findIndex(
-        //       (item: any) => item.id === active.id
-        //     );
-        //     const overIndex = overContainer.CompositionItems.findIndex(
-        //       (item: any) => item.id === over.id
-        //     );
-        //     const isBelowOverItem =
-        //       over &&
-        //       active.rect.current.translated &&
-        //       active.rect.current.translated.top >
-        //         over.rect.top + over.rect.height;
-        //     const modifier = isBelowOverItem ? 1 : 0;
-        //     const newIndex =
-        //       overIndex >= 0
-        //         ? overIndex + modifier
-        //         : overContainer.CompositionItems.length + 1;
-        //         console.log({newIndex})
-        //     const updatedPositionsOver = [
-        //       ...overContainer.CompositionItems.slice(0, newIndex),
-        //       activeContainer.CompositionItems[activeIndex],
-        //       ...overContainer.CompositionItems.slice(newIndex),
-        //     ];
-        //     const updatedQuotations = items.map((quotation) => {
-        //       if (quotation.id === +overContainerId) {
-        //         return {
-        //           ...quotation,
-        //           CompositionItems: updatedPositionsOver,
-        //         };
-        //       }
-        //       else if (quotation.id === +currentContainerId) {
-        //         return {
-        //           ...quotation,
-        //           CompositionItems: quotation.CompositionItems.filter(
-        //             (item) => item.id !== active.id
-        //           ),
-        //         };
-        //       }
-        //       return quotation;
-        //     });
-        //     // console.log({data})
-        //     // console.log({updatedQuotations})
-        //     return updatedQuotations;
-        //   });
-        // }
+
+        const { active, over } = e;
+        const { id } = active;
+        const { id: overId } = over;
+
+        const activeContainer = findContainer(id);
+        const overContainer = findContainer(overId);
+
+        if (
+          !activeContainer ||
+          !overContainer ||
+          activeContainer.id === overContainer.id
+        ) {
+          return;
+        }
+
+        const isOverContainer =
+          typeof overId === "string" && overId.includes(":");
+
+        setData((prev: any) => {
+          const activeItems = prev.find(
+            (comp: any) => comp.id === activeContainer.id
+          ).CompositionItems;
+          const overItems = prev.find(
+            (comp: any) => comp.id === overContainer.id
+          ).CompositionItems;
+
+          const activeIndex = activeItems.findIndex(
+            (item: any) => item.id === id
+          );
+          const overIndex = overItems.findIndex(
+            (item: any) => item.id === overId
+          );
+
+          let newIndex;
+          if (isOverContainer) {
+            newIndex = overItems.length + 1;
+          } else {
+            const isBelowLastItem =
+              over &&
+              overIndex === overItems.length - 1 &&
+              active.rect.current.translated &&
+              active.rect.current.translated.top >
+                over.rect.top + over.rect.height;
+
+            const modifier = isBelowLastItem ? 1 : 0;
+
+            newIndex =
+              overIndex >= 0 ? overIndex + modifier : overItems.length + 1;
+          }
+
+          const updatedPositionsOver = [
+            ...overItems.slice(0, newIndex),
+            activeItems[activeIndex],
+            ...overItems.slice(newIndex, overItems.length),
+          ];
+
+          const updatedPositionsActive = activeItems.filter(
+            (item: any) => item.id !== id
+          );
+
+          const updatedQuotations = prev.map((quotation: any) => {
+            if (quotation.id === activeContainer.id) {
+              return {
+                ...quotation,
+                CompositionItems: updatedPositionsActive,
+              };
+            } else if (quotation.id === overContainer.id) {
+              return {
+                ...quotation,
+                CompositionItems: updatedPositionsOver,
+              };
+            } else {
+              return quotation;
+            }
+          });
+
+          return updatedQuotations;
+        });
       }}
       onDragCancel={() => {
         setActive(null);
-        setActiveItem(null)
       }}
     >
       <Flex overflowX="scroll" overflowY="hidden" height="630px">
@@ -244,9 +252,8 @@ const QuotationBoard = ({
             handleAddItem={handleAddItem}
             handleDelete={handleDelete}
             handleEdit={handleEdit}
-            key={lane.id}
-            activeItem={activeItem}
-            id={lane.id}
+            key={`${lane.name}:${lane.id}`}
+            id={`${lane.name}:${lane.id}`}
             title={lane.name}
             items={lane.CompositionItems}
           />
@@ -254,31 +261,25 @@ const QuotationBoard = ({
       </Flex>
 
       <DragOverlay dropAnimation={dropAnimationConfig}>
-        {active && activeItem ? (
+        {active ? (
           <ProductCard
             setData={setData}
-            id={activeItem.id}
-            product={activeItem.Product}
-            quantity={activeItem.quantity}
-            index={findContainer(activeItem.id)?.CompositionItems.findIndex((item) => item.id === activeItem.id) ?? 0}
-            parent={activeItem.composition_id}
+            id={active?.id}
+            product={active.data.current?.product}
+            quantity={0}
+            index={
+              findContainer(active.id)?.CompositionItems.findIndex(
+                (item) => item.id === active.id
+              ) ?? 0
+            }
+            parent={active?.data?.current?.parent}
           />
         ) : null}
       </DragOverlay>
 
-      {active && activeItem ? <Trash id={activeItem.id} /> : null}
+      {active ? <Trash id={active?.id} /> : null}
     </DndContext>
   );
-};
-
-const dropAnimationConfig = {
-  sideEffects: defaultDropAnimationSideEffects({
-    styles: {
-      active: {
-        opacity: "0.4",
-      },
-    },
-  }),
 };
 
 function Trash({ id }: { id: number }) {

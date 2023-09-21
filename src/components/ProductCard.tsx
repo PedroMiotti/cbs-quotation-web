@@ -26,12 +26,12 @@ const ProductCard = ({
   index,
   parent,
   quantity,
-  setData
+  setData,
 }: {
   id: number;
   product: Product;
   index: number;
-  parent: number;
+  parent: string;
   quantity: number;
   setData: (data: any) => void;
 }) => {

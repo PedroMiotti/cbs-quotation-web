@@ -36,11 +36,13 @@ import { ReactSearchAutocomplete } from "react-search-autocomplete";
 import "../../styles/global.css";
 import { formatToBrlCurrency } from "../../utils/formatCurrency";
 
-export interface QuotationLane {
-  id: number;
-  name: string;
-  items: Product[];
-}
+// export type QuotationLane = {
+//   [key: string]: {
+//     id: number;
+//     title: string;
+//     items: CompositionItem[];
+//   };
+// };
 
 const Quotation = () => {
   let { id } = useParams();
@@ -230,11 +232,10 @@ const Quotation = () => {
       setCompositions(updatedCompositions);
     });
 
-    onCloseAddItemModal()
+    onCloseAddItemModal();
   };
 
   const handleMoveItem = async (itemId: number, newCompositionId: number) => {
-    console.log({ itemId, newCompositionId })
     if (!newCompositionId || !itemId) return;
     await moveItem(itemId, newCompositionId);
   };
@@ -258,13 +259,16 @@ const Quotation = () => {
 
     if (!quotation) return;
 
-    setIsExporting(true)
-    const response = await exportQuotation(quotation.id)
+    setIsExporting(true);
+    const response = await exportQuotation(quotation.id);
 
     const url = window.URL.createObjectURL(new Blob([response]));
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", `cotacao-${quotation.name.toLowerCase()}.xlsx`);
+    link.setAttribute(
+      "download",
+      `cotacao-${quotation.name.toLowerCase()}.xlsx`
+    );
     document.body.appendChild(link);
     link.click();
 
