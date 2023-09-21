@@ -1,8 +1,9 @@
 import axios, { AxiosResponse, InternalAxiosRequestConfig } from "axios";
 
+const ApiUrl = process.env.REACT_APP_API_URL;
 let BASE_URL;
 if (process.env.NODE_ENV === "development") BASE_URL = "http://localhost:5000";
-else BASE_URL = "/api";
+else BASE_URL = `${ApiUrl}/api`;
 
 export const Api = axios.create({
   baseURL: BASE_URL,
