@@ -68,8 +68,9 @@ const ProductCard = ({
     await updateItemQuantityInComposition(id, updatedQuantity);
 
     setData((prev: any) => {
+      const compositionId = parent.split(':')[1];
       const newComposition = prev.map((composition: any) => {
-        if(composition.id === parent) {
+        if(composition.id === +compositionId) {
           const newCompositionItems = composition.CompositionItems.map((item: any) => {
             if(item.id === id) {
               return {

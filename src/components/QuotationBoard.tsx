@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import {
   Active,
   DndContext,
@@ -7,19 +5,17 @@ import {
   KeyboardSensor,
   PointerSensor,
   closestCenter,
-  rectIntersection,
   useDroppable,
   useSensor,
   useSensors,
-  MeasuringStrategy,
   TouchSensor,
   DragOverlay,
   defaultDropAnimationSideEffects,
 } from "@dnd-kit/core";
 import { Flex, useToast, Icon } from "@chakra-ui/react";
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import QuotationLaneComponent from "./QuotationLane";
-import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
+import { arrayMove } from "@dnd-kit/sortable";
 import { Composition, CompositionItem } from "../types/Composition";
 import { coordinateGetter as multipleContainersCoordinateGetter } from "./CoordinateGetter";
 import ProductCard from "./ProductCard";
@@ -119,6 +115,11 @@ const QuotationBoard = ({
         const activeContainer = findContainer(id);
         const overContainer = findContainer(overId);
 
+        if (!activeContainer) {
+          setActive(null);
+          return;
+        }
+
         if (overId === "trash") {
           handleDeleteItem(+id);
           setActive(null);
@@ -153,11 +154,7 @@ const QuotationBoard = ({
           return;
         }
 
-        if (
-          !activeContainer ||
-          !overContainer ||
-          activeContainer.id !== overContainer.id
-        ) {
+        if (!overContainer || activeContainer.id !== overContainer.id) {
           setActive(null);
           return;
         }
@@ -198,7 +195,8 @@ const QuotationBoard = ({
       onDragOver={(e: DragEndEvent) => {
         const { active, over } = e;
         const { id } = active;
-        const { id: overId } = over;
+
+        const overId = over!.id;
 
         const activeContainer = findContainer(id);
         const overContainer = findContainer(overId);
@@ -300,7 +298,7 @@ const QuotationBoard = ({
         {active ? (
           <ProductCard
             setData={setData}
-            id={active?.id}
+            id={active?.id as number}
             product={active.data.current?.product}
             quantity={0}
             index={
@@ -312,13 +310,13 @@ const QuotationBoard = ({
           />
         ) : null}
       </DragOverlay>
-      
+
       {active ? <Trash id="trash" /> : null}
     </DndContext>
   );
 };
 
-function Trash({ id }: { id: number }) {
+function Trash({ id }: { id: string }) {
   const { setNodeRef, isOver } = useDroppable({
     id,
   });
@@ -331,9 +329,9 @@ function Trash({ id }: { id: number }) {
       justify="center"
       left="50%"
       marginLeft={"-150px"}
-      bottom={'20px'}
-      width={'300px'}
-      height={'80px'}
+      bottom={"20px"}
+      width={"300px"}
+      height={"80px"}
       borderRadius={5}
       border="1px solid"
       borderColor={isOver ? "red" : "#DDD"}
@@ -341,7 +339,12 @@ function Trash({ id }: { id: number }) {
       bg="white"
       gap={4}
     >
-      <Icon as={FiTrash} mt='1px' size="20px" color={isOver ? "red" : "black"} />
+      <Icon
+        as={FiTrash}
+        mt="1px"
+        size="20px"
+        color={isOver ? "red" : "black"}
+      />
       Solte aqui para excluir
     </Flex>
   );
