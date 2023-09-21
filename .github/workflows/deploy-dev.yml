@@ -10,22 +10,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: 14
+    - name: Install dependencies and build
+      run: |
+        npm install
+        npm run build
 
-      - name: Install Dependencies
-        run: npm install
-
-      - name: Build React App
-        run: npm run build
-
-      - name: Deploy to Netlify
-        run: |
-          npm install -g netlify-cli
-          netlify login -a "${{ secrets.NETLIFY_AUTH_TOKEN_DEV }}"
-          netlify deploy --prod --dir=build
+    - name: Deploy to Netlify
+      uses: netlify/actions/cli@master
+      with:
+        args: deploy --prod --dir build
+      env:
+        NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        NETLIFY_SITE_ID: 867004fa-8ba9-4527-b0c7-1c67de68e9e6
