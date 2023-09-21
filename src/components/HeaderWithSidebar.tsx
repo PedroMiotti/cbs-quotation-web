@@ -59,45 +59,6 @@ const Tabs = [
   },
 ];
 
-// const quotations: Quotation[] = [
-//   {
-//     id: 1,
-//     name: "2022",
-//     type: "CHRISTMAS",
-//     Composition: [],
-//   },
-//   {
-//     id: 2,
-//     name: "2021",
-//     type: "CHRISTMAS",
-//     Composition: [],
-//   },
-//   {
-//     id: 3,
-//     name: "2023",
-//     type: "CHRISTMAS",
-//     Composition: [],
-//   },
-//   {
-//     id: 4,
-//     name: "Ambev",
-//     type: "CUSTOM",
-//     Composition: [],
-//   },
-//   {
-//     id: 5,
-//     name: "Vale",
-//     type: "CUSTOM",
-//     Composition: [],
-//   },
-//   {
-//     id: 6,
-//     name: "Brasuco",
-//     type: "CUSTOM",
-//     Composition: [],
-//   },
-// ];
-
 export default function SidebarWithHeader({
   children,
 }: {
@@ -209,6 +170,7 @@ const SidebarContent = ({
   ...rest
 }: SidebarProps) => {
   const navigate = useNavigate();
+  const pathname = useLocation()
 
   const { quotations } = useQuotation();
 
@@ -273,6 +235,7 @@ const SidebarContent = ({
           {Tabs.map((link) => (
             <Stack key={link.name} spacing={0}>
               <NavItem
+                isSelected={pathname.pathname === link.route}
                 key={`nav-item-${link.name}`}
                 color="gray.500"
                 fontWeight="semibold"
@@ -416,6 +379,7 @@ interface NavItemProps extends FlexProps {
   route: string;
   onItemClick: () => void;
   isSidebarOpen: boolean;
+  isSelected: boolean;
   children: ReactText;
 }
 const NavItem = ({
@@ -424,6 +388,7 @@ const NavItem = ({
   onItemClick,
   isSidebarOpen,
   children,
+  isSelected,
   ...rest
 }: NavItemProps) => {
   const handleItemClick = () => {
@@ -449,13 +414,14 @@ const NavItem = ({
           bg: "rgba(131, 183, 53, .25)",
           color: "#83B735",
         }}
+        sx={isSelected ? { bg: "rgba(131, 183, 53, .25)", color: "#83B735"} : {}}
         {...rest}
       >
         {icon && (
           <Icon
             mr="4"
             fontSize="18"
-            color="gray.500"
+            color={isSelected ? "#83B735" : "gray.500"}
             _groupHover={{
               color: "#83B735",
             }}
