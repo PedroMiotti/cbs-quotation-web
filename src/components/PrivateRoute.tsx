@@ -1,11 +1,12 @@
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import SidebarWithHeader from "./HeaderWithSidebar";
 
 interface PrivateRouteProps {
   hasDefaultLayout: boolean;
+  children: React.ReactNode;
 }
 
-function PrivateRoute({ hasDefaultLayout }: PrivateRouteProps) {
+function PrivateRoute({ hasDefaultLayout, children }: PrivateRouteProps) {
   const isAuthenticated = localStorage.getItem('token');
 
   if (!isAuthenticated) return <Navigate to="/auth" replace />;
@@ -13,10 +14,10 @@ function PrivateRoute({ hasDefaultLayout }: PrivateRouteProps) {
   if (hasDefaultLayout)
     return (
       <SidebarWithHeader>
-        <Outlet />
+        {children}
       </SidebarWithHeader>
     );
-  else return <Outlet />;
+  else return <>{children}</>;
 }
 
 export default PrivateRoute;

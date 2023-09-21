@@ -1,23 +1,72 @@
 import * as React from "react";
 import { Box, ChakraProvider } from "@chakra-ui/react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import {
+  createBrowserRouter,
+  BrowserRouter,
+  Route,
+  Routes,
+  RouterProvider,
+} from "react-router-dom";
 import PrivateRoute from "./components/PrivateRoute";
 import routes from "./routes";
 import Authentication from "./pages/Authentication";
 import { QuotationProvider } from "./context/Quotation";
 import { useEffect } from "react";
+import Brands from "./pages/Brands";
+import Products from "./pages/Products";
+import EditQuotation from "./pages/Quotation/edit";
+import Quotations from "./pages/Quotation";
 
 function App() {
   useEffect(() => {
     const initialValue = document.body.style.zoom;
 
-    document.body.style.zoom = '100%';
+    document.body.style.zoom = "100%";
 
     return () => {
       document.body.style.zoom = initialValue;
     };
   }, []);
-  
+
+  const router = createBrowserRouter([
+    {
+      path: "/auth",
+      element: <Authentication />,
+    },
+    {
+      path: "/",
+      element: (
+        <PrivateRoute hasDefaultLayout>
+          <Products />
+        </PrivateRoute>
+      ),
+    },
+    {
+      path: "/marcas",
+      element: (
+        <PrivateRoute hasDefaultLayout>
+          <Brands />
+        </PrivateRoute>
+      ),
+    },
+    {
+      path: "/quotation/edit/:id",
+      element: (
+        <PrivateRoute hasDefaultLayout>
+          <EditQuotation />
+        </PrivateRoute>
+      ),
+    },
+    {
+      path: "/quotation",
+      element: (
+        <PrivateRoute hasDefaultLayout>
+          <Quotations />
+        </PrivateRoute>
+      ),
+    },
+  ]);
+
   return (
     <div
       style={{
@@ -28,20 +77,7 @@ function App() {
     >
       <ChakraProvider>
         <QuotationProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/auth" element={<Authentication />} />
-              <Route element={<PrivateRoute hasDefaultLayout />}>
-                {routes.map((route, index) => (
-                  <Route
-                    key={index}
-                    path={route.path}
-                    element={<route.component />}
-                  />
-                ))}
-              </Route>
-            </Routes>
-          </BrowserRouter>
+          <RouterProvider router={router} />
         </QuotationProvider>
       </ChakraProvider>
     </div>
